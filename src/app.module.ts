@@ -8,6 +8,7 @@ import Joi from 'joi';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { User } from './user/entities/user.entity';
+import { RefreshToken } from './auth/entities/refresh-token.entity';
 
 const typeOrmModuleOptions = {
   // useFactory는 동적 모듈의 속성을 설정하기 위해 사용
@@ -22,7 +23,7 @@ const typeOrmModuleOptions = {
     host: configService.get('DB_HOST'),
     port: configService.get('DB_PORT'),
     database: configService.get('DB_NAME'),
-    entities: [User],
+    entities: [User, RefreshToken],
     synchronize: configService.get('DB_SYNC'),
     logging: true,
   }),
