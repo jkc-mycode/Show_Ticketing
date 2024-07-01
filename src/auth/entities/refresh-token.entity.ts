@@ -13,7 +13,7 @@ export class RefreshToken {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'number', unique: true, nullable: false })
+  @Column({ type: 'int', unique: true, nullable: false })
   userId: number;
 
   @Column({ type: 'varchar', nullable: false })
