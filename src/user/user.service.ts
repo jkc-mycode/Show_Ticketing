@@ -11,6 +11,11 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
+  // 사용자 ID로 사용자 조회 (사용자 프로필 조회)
+  async findByUserId(id: number) {
+    return this.userRepository.findOne({ where: { id } });
+  }
+
   // 이메일로 사용자 조회
   async findByEmail(email: string, requiredPw: boolean = false) {
     return await this.userRepository.findOne({

@@ -28,8 +28,6 @@ export class AuthService {
 
   // 회원가입
   async signUp(email: string, password: string, passwordCheck: string, nickname: string) {
-    // const user = await this.userService.signUp(email, password, passwordCheck, nickname);
-
     if (password !== passwordCheck) {
       throw new BadRequestException('비밀번호 확인과 일치하지 않습니다.');
     }
@@ -79,7 +77,6 @@ export class AuthService {
     const accessToken = this.jwtService.sign({ id: user.id });
     const refreshToken = this.jwtService.sign({ id: user.id });
 
-    console.log(user);
     // Refresh Token 저장
     await this.refreshTokenRepository.upsert(
       {
