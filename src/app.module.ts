@@ -2,7 +2,12 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 import Joi from 'joi';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { User } from './user/entities/user.entity';
 
 const typeOrmModuleOptions = {
   // useFactory는 동적 모듈의 속성을 설정하기 위해 사용
@@ -17,7 +22,7 @@ const typeOrmModuleOptions = {
     host: configService.get('DB_HOST'),
     port: configService.get('DB_PORT'),
     database: configService.get('DB_NAME'),
-    entities: [],
+    entities: [User],
     synchronize: configService.get('DB_SYNC'),
     logging: true,
   }),
@@ -42,8 +47,10 @@ const typeOrmModuleOptions = {
     }),
     // forRootAsync는 TypeOrmModule의 동적인 기초 설정을 위해 사용 (환경변수나 데이터베이스)
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
+    AuthModule,
+    UserModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
