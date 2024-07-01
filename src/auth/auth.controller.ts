@@ -9,6 +9,7 @@ export class AuthController {
   // eslint-disable-next-line prettier/prettier
   constructor(private readonly authService: AuthService) {}
 
+  // 회원가입
   @Post('sign-up')
   async register(@Body() signUpDto: SignUpDto) {
     return await this.authService.signUp(
@@ -19,6 +20,7 @@ export class AuthController {
     );
   }
 
+  // 로그인
   @Post('sign-in')
   async login(@Body() signInDto: SignInDto) {
     return await this.authService.signIn(signInDto.email, signInDto.password);
