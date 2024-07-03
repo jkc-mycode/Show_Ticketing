@@ -172,6 +172,36 @@ export class ShowService {
     return createdShowList;
   }
 
+  // 공연 검색
+  async findShowByTitle(title: string) {
+    // 쿼리빌더를 활용한 데이터베이스 접근
+    // 기존에 find, findOne 방식이 아닌 다른 방법으로 접근함
+    const shows = await this.showRepository
+      .createQueryBuilder('show')
+      .innerJoinAndSelect('show.showPlace', 'showPlace')
+      .innerJoinAndSelect('show.showImages', 'showImage')
+      .innerJoinAndSelect('show.showTimes', 'showTime')
+      // 해당 제목의 일부만 있어도 검색 가능
+      .where('show.title like :title', { title: `%${title}%` })
+      .orderBy('show.createdAt', 'DESC')
+      .getMany();
+
+    // 출력 형식 지정
+    const searchedShow = shows.map((show) => {
+      return {
+        id: show.id,
+        title: show.title,
+        category: show.category,
+        placeName: show.showPlace.placeName,
+        showTimes: show.showTimes.map((time) => time.showTime),
+        showPoster: show.showImages[0].imageUrl,
+        createdAt: show.createdAt,
+        updatedAt: show.updatedAt,
+      };
+    });
+    return searchedShow;
+  }
+
   // 공연 상세 조회
   async findShowDetail(showId: number) {
     const show = await this.showRepository.findOne({
