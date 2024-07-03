@@ -15,7 +15,7 @@ import { Role } from 'src/user/types/userRole.type';
 import { RolesGuard } from 'src/auth/utils/roles.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
-@Controller('show')
+@Controller('shows')
 export class ShowController {
   // eslint-disable-next-line prettier/prettier
   constructor(private readonly showService: ShowService) {}
