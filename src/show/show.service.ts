@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Show } from './entities/show.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -170,5 +170,46 @@ export class ShowService {
     });
 
     return createdShowList;
+  }
+
+  // 공연 상세 조회
+  async findShowDetail(showId: number) {
+    const show = await this.showRepository.findOne({
+      where: { id: showId },
+      relations: {
+        showImages: true,
+        showPlace: true,
+        showTimes: true,
+        showPrice: true,
+      },
+    });
+    if (!show) {
+      throw new NotFoundException('등록된 공연 정보가 없습니다.');
+    }
+
+    // 출력 형식 지정
+    const searchedShow = {
+      id: show.id,
+      title: show.title,
+      content: show.content,
+      category: show.category,
+      runningTime: show.runningTime,
+      placeName: show.showPlace.placeName,
+      totalSeat: show.showPlace.totalSeat,
+      seatA: show.showPlace.seatA,
+      priceA: show.showPrice.priceA,
+      seatS: show.showPlace.seatS,
+      priceS: show.showPrice.priceS,
+      seatR: show.showPlace.seatR,
+      priceR: show.showPrice.priceR,
+      seatVip: show.showPlace.seatVip,
+      priceVip: show.showPrice.priceVip,
+      showTimes: show.showTimes.map((time) => time.showTime),
+      showPoster: show.showImages.map((image) => image.imageUrl),
+      createdAt: show.createdAt,
+      updatedAt: show.updatedAt,
+    };
+
+    return searchedShow;
   }
 }

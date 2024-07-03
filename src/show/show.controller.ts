@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Query,
   UploadedFiles,
@@ -37,5 +38,11 @@ export class ShowController {
   @Get()
   async findShowList(@Query('category') queryData: string) {
     return await this.showService.findShowList(queryData);
+  }
+
+  // 공연 목록 조회
+  @Get('/:showId')
+  async findShowDetail(@Param('showId') showId: string) {
+    return await this.showService.findShowDetail(+showId);
   }
 }
