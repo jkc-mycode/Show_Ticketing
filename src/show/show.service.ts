@@ -8,6 +8,7 @@ import { ShowTime } from './entities/showTime.entity';
 import { ShowPrice } from './entities/showPrice.entity';
 import { ShowPlace } from './entities/showPlace.entity';
 import { AwsService } from 'src/aws/aws.service';
+import { Category } from './types/showCategory.type';
 
 @Injectable()
 export class ShowService {
@@ -124,7 +125,7 @@ export class ShowService {
         priceR: showPrice.priceR,
         priceVip: showPrice.priceVip,
         showTimes: showTimes.map((time) => time.showTime),
-        showImages,
+        showImages: showImages.map((image) => image.imageUrl),
         createdAt: show.createdAt,
         updatedAt: show.updatedAt,
       };
@@ -139,5 +140,35 @@ export class ShowService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  // 공연 목록 조회
+  async findShowList(queryData: string) {
+    const showList = await this.showRepository.find({
+      // 쿼리 스트링을 통해 카테고리별로 조회
+      where: queryData ? { category: Category[queryData.toUpperCase()] } : {},
+      relations: {
+        showImages: true,
+        showPlace: true,
+        showTimes: true,
+      },
+      order: { createdAt: 'DESC' },
+    });
+
+    // 출력 형식 지정
+    const createdShowList = showList.map((show) => {
+      return {
+        id: show.id,
+        title: show.title,
+        category: show.category,
+        placeName: show.showPlace.placeName,
+        showTimes: show.showTimes.map((time) => time.showTime),
+        showPoster: show.showImages[0].imageUrl,
+        createdAt: show.createdAt,
+        updatedAt: show.updatedAt,
+      };
+    });
+
+    return createdShowList;
   }
 }
