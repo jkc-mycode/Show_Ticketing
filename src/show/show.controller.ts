@@ -40,6 +40,12 @@ export class ShowController {
     return await this.showService.findShowList(queryData);
   }
 
+  // 공연 검색
+  @Get('/search')
+  async findShowByTitle(@Query('title') queryData: string) {
+    return await this.showService.findShowByTitle(queryData);
+  }
+
   // 공연 목록 조회
   @Get('/:showId')
   async findShowDetail(@Param('showId') showId: string) {
