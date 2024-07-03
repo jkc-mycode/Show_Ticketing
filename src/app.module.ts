@@ -9,6 +9,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { User } from './user/entities/user.entity';
 import { RefreshToken } from './auth/entities/refresh-token.entity';
+import { ShowModule } from './show/show.module';
+import { Show } from './show/entities/show.entity';
+import { ShowImage } from './show/entities/showImage.entity';
+import { ShowTime } from './show/entities/showTime.entity';
+import { ShowPrice } from './show/entities/showPrice.entity';
+import { ShowPlace } from './show/entities/showPlace.entity';
+import { AwsModule } from './aws/aws.module';
 
 const typeOrmModuleOptions = {
   // useFactory는 동적 모듈의 속성을 설정하기 위해 사용
@@ -23,7 +30,7 @@ const typeOrmModuleOptions = {
     host: configService.get('DB_HOST'),
     port: configService.get('DB_PORT'),
     database: configService.get('DB_NAME'),
-    entities: [User, RefreshToken],
+    entities: [User, RefreshToken, Show, ShowImage, ShowTime, ShowPrice, ShowPlace],
     synchronize: configService.get('DB_SYNC'),
     logging: true,
   }),
@@ -50,6 +57,8 @@ const typeOrmModuleOptions = {
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     AuthModule,
     UserModule,
+    ShowModule,
+    AwsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
