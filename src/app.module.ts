@@ -16,6 +16,9 @@ import { ShowTime } from './show/entities/showTime.entity';
 import { ShowPrice } from './show/entities/showPrice.entity';
 import { ShowPlace } from './show/entities/showPlace.entity';
 import { AwsModule } from './aws/aws.module';
+import { SeatModule } from './seat/seat.module';
+import { Seat } from './seat/entities/seat.entity';
+import { Ticket } from './seat/entities/ticket.entity';
 
 const typeOrmModuleOptions = {
   // useFactory는 동적 모듈의 속성을 설정하기 위해 사용
@@ -30,7 +33,7 @@ const typeOrmModuleOptions = {
     host: configService.get('DB_HOST'),
     port: configService.get('DB_PORT'),
     database: configService.get('DB_NAME'),
-    entities: [User, RefreshToken, Show, ShowImage, ShowTime, ShowPrice, ShowPlace],
+    entities: [User, RefreshToken, Show, ShowImage, ShowTime, ShowPrice, ShowPlace, Seat, Ticket],
     synchronize: configService.get('DB_SYNC'),
     logging: true,
   }),
@@ -59,6 +62,7 @@ const typeOrmModuleOptions = {
     UserModule,
     ShowModule,
     AwsModule,
+    SeatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -4,10 +4,14 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Show } from './show.entity';
+import { ShowPlace } from './showPlace.entity';
+import { Seat } from 'src/seat/entities/seat.entity';
 
 @Entity({
   name: 'show_time',
@@ -33,4 +37,10 @@ export class ShowTime {
   @ManyToOne(() => Show, (show) => show.showTimes, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'show_id' })
   show: Show;
+
+  @OneToOne(() => ShowPlace, (showPlace) => showPlace.showTime)
+  showPlace: ShowPlace;
+
+  @OneToMany(() => Seat, (seat) => seat.show)
+  seats: Seat;
 }

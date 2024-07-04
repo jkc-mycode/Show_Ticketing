@@ -9,6 +9,8 @@ import { ShowPrice } from './entities/showPrice.entity';
 import { ShowPlace } from './entities/showPlace.entity';
 import { AwsService } from 'src/aws/aws.service';
 import { Category } from './types/showCategory.type';
+import { Seat } from 'src/seat/entities/seat.entity';
+import { Grade } from 'src/seat/types/grade.type';
 
 @Injectable()
 export class ShowService {
@@ -23,6 +25,8 @@ export class ShowService {
     private readonly showPriceRepository: Repository<ShowPrice>,
     @InjectRepository(ShowPlace)
     private readonly showPlaceRepository: Repository<ShowPlace>,
+    @InjectRepository(Seat)
+    private readonly seatRepository: Repository<Seat>,
     private readonly dataSource: DataSource,
     private readonly awsService: AwsService,
   ) {}
@@ -68,17 +72,6 @@ export class ShowService {
       // 이미지 데이터를 업로드
       images = await this.awsService.imageUpload(files);
 
-      // show_place 테이블에 데이터 저장
-      const showPlace = this.showPlaceRepository.create({
-        showId: show.id,
-        placeName,
-        totalSeat: seatA + (seatS ?? 0) + (seatR ?? 0) + (seatVip ?? 0),
-        seatA,
-        seatS,
-        seatR,
-        seatVip,
-      });
-
       // show_price 테이블에 데이터 저장
       const showPrice = this.showPriceRepository.create({
         showId: show.id,
@@ -106,24 +99,94 @@ export class ShowService {
 
       // queryRunner를 병렬로 처리해서 데이터베이스에 저장
       await Promise.all([
-        queryRunner.manager.save(showPlace),
         queryRunner.manager.save(showPrice),
         queryRunner.manager.save(showTimes),
         queryRunner.manager.save(showImages),
       ]);
 
+      // show_place 테이블에 데이터 저장
+      const totalSeat: number = seatA + (seatS ?? 0) + (seatR ?? 0) + (seatVip ?? 0);
+      const showPlace = showTimes.map((showTime) =>
+        this.showPlaceRepository.create({
+          showId: show.id,
+          showTimeId: showTime.id,
+          placeName,
+          totalSeat,
+          seatA,
+          seatS,
+          seatR,
+          seatVip,
+        }),
+      );
+      await queryRunner.manager.save(showPlace);
+
+      for (let k = 0; k < showPlace.length; k++) {
+        let seatNumber = 1;
+        for (let i = 1; i <= showPlace[k].seatA; i++) {
+          await queryRunner.manager.save(
+            this.seatRepository.create({
+              showId: show.id,
+              showTimeId: showPlace[k].showTimeId,
+              seatNumber,
+              grade: Grade.A,
+              price: showPrice.priceA,
+            }),
+          );
+          seatNumber++;
+        }
+
+        for (let i = 1; i <= showPlace[k].seatS; i++) {
+          await queryRunner.manager.save(
+            this.seatRepository.create({
+              showId: show.id,
+              showTimeId: showPlace[k].showTimeId,
+              seatNumber,
+              grade: Grade.S,
+              price: showPrice.priceS,
+            }),
+          );
+          seatNumber++;
+        }
+
+        for (let i = 1; i <= showPlace[k].seatR; i++) {
+          await queryRunner.manager.save(
+            this.seatRepository.create({
+              showId: show.id,
+              showTimeId: showPlace[k].showTimeId,
+              seatNumber,
+              grade: Grade.R,
+              price: showPrice.priceR,
+            }),
+          );
+          seatNumber++;
+        }
+
+        for (let i = 1; i <= showPlace[k].seatVip; i++) {
+          await queryRunner.manager.save(
+            this.seatRepository.create({
+              showId: show.id,
+              showTimeId: showPlace[k].showTimeId,
+              seatNumber,
+              grade: Grade.VIP,
+              price: showPrice.priceVip,
+            }),
+          );
+          seatNumber++;
+        }
+      }
+
       // 출력 형식 지정
       const createdShow = {
         id: show.id,
-        title: show.title,
-        content: show.content,
-        runningTime: show.runningTime,
-        placeName: showPlace.placeName,
-        totalSeat: showPlace.totalSeat,
-        priceA: showPrice.priceA,
-        priceS: showPrice.priceS,
-        priceR: showPrice.priceR,
-        priceVip: showPrice.priceVip,
+        title,
+        content,
+        runningTime,
+        placeName,
+        totalSeat,
+        priceA,
+        priceS,
+        priceR,
+        priceVip,
         showTimes: showTimes.map((time) => time.showTime),
         showImages: showImages.map((image) => image.imageUrl),
         createdAt: show.createdAt,
@@ -161,7 +224,7 @@ export class ShowService {
         id: show.id,
         title: show.title,
         category: show.category,
-        placeName: show.showPlace.placeName,
+        placeName: show.showPlace[0].placeName,
         showTimes: show.showTimes.map((time) => time.showTime),
         showPoster: show.showImages[0].imageUrl,
         createdAt: show.createdAt,
@@ -192,7 +255,7 @@ export class ShowService {
         id: show.id,
         title: show.title,
         category: show.category,
-        placeName: show.showPlace.placeName,
+        placeName: show.showPlace[0].placeName,
         showTimes: show.showTimes.map((time) => time.showTime),
         showPoster: show.showImages[0].imageUrl,
         createdAt: show.createdAt,
@@ -224,15 +287,11 @@ export class ShowService {
       content: show.content,
       category: show.category,
       runningTime: show.runningTime,
-      placeName: show.showPlace.placeName,
-      totalSeat: show.showPlace.totalSeat,
-      seatA: show.showPlace.seatA,
+      placeName: show.showPlace[0].placeName,
+      totalSeat: show.showPlace[0].totalSeat,
       priceA: show.showPrice.priceA,
-      seatS: show.showPlace.seatS,
       priceS: show.showPrice.priceS,
-      seatR: show.showPlace.seatR,
       priceR: show.showPrice.priceR,
-      seatVip: show.showPlace.seatVip,
       priceVip: show.showPrice.priceVip,
       showTimes: show.showTimes.map((time) => time.showTime),
       showPoster: show.showImages.map((image) => image.imageUrl),

@@ -10,6 +10,7 @@ import { ShowTime } from './entities/showTime.entity';
 import { ShowPlace } from './entities/showPlace.entity';
 import { ShowPrice } from './entities/showPrice.entity';
 import { AwsModule } from 'src/aws/aws.module';
+import { Seat } from 'src/seat/entities/seat.entity';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { AwsModule } from 'src/aws/aws.module';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Show, ShowImage, ShowTime, ShowPlace, ShowPrice]),
+    TypeOrmModule.forFeature([Show, ShowImage, ShowTime, ShowPlace, ShowPrice, Seat]),
     AwsModule,
   ],
   providers: [ShowService],
