@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -12,6 +13,7 @@ import { ShowImage } from './showImage.entity';
 import { ShowTime } from './showTime.entity';
 import { ShowPrice } from './showPrice.entity';
 import { ShowPlace } from './showPlace.entity';
+import { Seat } from 'src/seat/entities/seat.entity';
 
 @Entity({
   name: 'show',
@@ -20,12 +22,14 @@ export class Show {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index()
   @Column({ type: 'varchar', nullable: false })
   title: string;
 
   @Column({ type: 'text', nullable: false })
   content: string;
 
+  @Index()
   @Column({ type: 'enum', enum: Category, nullable: false })
   category: Category;
 
@@ -47,6 +51,9 @@ export class Show {
   @OneToOne(() => ShowPrice, (showPrice) => showPrice.show)
   showPrice: ShowPrice;
 
-  @OneToOne(() => ShowPlace, (showPlace) => showPlace.show)
-  showPlace: ShowPlace;
+  @OneToMany(() => ShowPlace, (showPlace) => showPlace.show)
+  showPlace: ShowPlace[];
+
+  @OneToMany(() => Seat, (seat) => seat.show)
+  seats: Seat;
 }
