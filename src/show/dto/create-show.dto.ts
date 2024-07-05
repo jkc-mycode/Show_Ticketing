@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Max,
 } from 'class-validator';
 import { Category } from '../types/showCategory.type';
 import { Transform, Type } from 'class-transformer';
@@ -80,6 +81,7 @@ export class CreateShowDto {
   // A좌석 가격
   @Type(() => Number)
   @IsNumber()
+  @Max(50000, { message: '좌석의 가격은 5만 포인트 이하여야 합니다.' })
   @IsNotEmpty({ message: '장소의 A좌석 가격을 입력해 주세요.' })
   priceA: number;
 
@@ -87,17 +89,20 @@ export class CreateShowDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  @Max(50000, { message: '좌석의 가격은 5만 포인트 이하여야 합니다.' })
   priceS: number;
 
   // R좌석 가격
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  @Max(50000, { message: '좌석의 가격은 5만 포인트 이하여야 합니다.' })
   priceR: number;
 
   // Vip좌석 가격
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  @Max(50000, { message: '좌석의 가격은 5만 포인트 이하여야 합니다.' })
   priceVip: number;
 }
