@@ -59,6 +59,10 @@ export class Ticket {
   @Column({ type: 'varchar', nullable: false })
   place: string;
 
+  // 취소 여부
+  @Column({ type: 'boolean', default: false })
+  isCanceled: boolean = false;
+
   @CreateDateColumn()
   createdAt: Date;
 
