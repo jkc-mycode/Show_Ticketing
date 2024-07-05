@@ -31,15 +31,19 @@ export class Seat {
   @Column({ type: 'int', name: 'show_time_id' })
   showTimeId: number;
 
+  // 좌석 번호
   @Column({ type: 'int', nullable: false })
   seatNumber: number;
 
+  // 좌석 등급
   @Column({ type: 'enum', enum: Grade, nullable: false })
   grade: Grade;
 
+  // 좌석 가격
   @Column({ type: 'int', nullable: false })
   price: number;
 
+  // 예약 여부
   @Column({ type: 'boolean', default: false })
   isReserved: boolean = false;
 
@@ -59,6 +63,7 @@ export class Seat {
   @JoinColumn({ name: 'show_time_id' })
   showTime: ShowTime;
 
+  // 티켓 엔티티와 관계 설정
   @OneToOne(() => Ticket, (ticket) => ticket.seats)
   ticket: Ticket;
 }

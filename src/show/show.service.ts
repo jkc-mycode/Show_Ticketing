@@ -120,8 +120,10 @@ export class ShowService {
       );
       await queryRunner.manager.save(showPlace);
 
+      // 장소(시간)별, 등급별 좌석 정보 추가하기
       for (let k = 0; k < showPlace.length; k++) {
         let seatNumber = 1;
+        // A 좌석 데이터 저장
         for (let i = 1; i <= showPlace[k].seatA; i++) {
           await queryRunner.manager.save(
             this.seatRepository.create({
@@ -135,6 +137,7 @@ export class ShowService {
           seatNumber++;
         }
 
+        // S 좌석 데이터 저장
         for (let i = 1; i <= showPlace[k].seatS; i++) {
           await queryRunner.manager.save(
             this.seatRepository.create({
@@ -148,6 +151,7 @@ export class ShowService {
           seatNumber++;
         }
 
+        // R 좌석 데이터 저장
         for (let i = 1; i <= showPlace[k].seatR; i++) {
           await queryRunner.manager.save(
             this.seatRepository.create({
@@ -161,6 +165,7 @@ export class ShowService {
           seatNumber++;
         }
 
+        // Vip 좌석 데이터 저장
         for (let i = 1; i <= showPlace[k].seatVip; i++) {
           await queryRunner.manager.save(
             this.seatRepository.create({
@@ -293,6 +298,15 @@ export class ShowService {
       priceS: show.showPrice.priceS,
       priceR: show.showPrice.priceR,
       priceVip: show.showPrice.priceVip,
+      // 날짜별 잔여 좌석 수
+      showPlace: show.showPlace.map((place) => {
+        return {
+          seatA: place.seatA,
+          seatS: place.seatS,
+          seatR: place.seatR,
+          seatVip: place.seatVip,
+        };
+      }),
       showTimes: show.showTimes.map((time) => time.showTime),
       showPoster: show.showImages.map((image) => image.imageUrl),
       createdAt: show.createdAt,

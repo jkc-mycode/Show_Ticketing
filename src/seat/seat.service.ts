@@ -31,12 +31,9 @@ export class SeatService {
 
   // 좌석 예매
   async reserveSeat(user: User, showId: number, reserveSeatDto: ReserveSeatDto) {
-    console.log(user);
-    console.log(showId);
-    console.log(reserveSeatDto);
-
     const { seatNumber, showTimeId } = reserveSeatDto;
 
+    // 존재하는 좌석인지 체크
     const seat = await this.seatRepository.findOne({
       where: { seatNumber, showTimeId },
     });
@@ -44,8 +41,9 @@ export class SeatService {
       throw new NotFoundException('등록된 좌석이 없습니다.');
     }
     if (seat.isReserved) {
-      throw new UnauthorizedException('이미 예약된 좌석입니다.');
+      throw new UnauthorizedException('이미 예매된 좌석입니다.');
     }
+    // 사용자 잔여 포인트 확인
     if (user.point < seat.price) {
       throw new UnauthorizedException('포인트가 부족합니다.');
     }
@@ -64,6 +62,7 @@ export class SeatService {
         where: { showTimeId },
       });
 
+      // 어떤 좌석의 수를 변경할지에 대한 객체 생성
       const condition = {};
       if (seat.grade === Grade.A) {
         condition['seatA'] = place.seatA - 1;
@@ -75,6 +74,7 @@ export class SeatService {
         condition['seatVip'] = place.seatVip - 1;
       }
 
+      // 잔여 좌석 수 변경
       const updatedPlace = this.showPlaceRepository.merge(place, condition);
 
       // 티켓 생성
@@ -104,13 +104,41 @@ export class SeatService {
         queryRunner.manager.save(newTicket),
       ]);
 
+      // 트랜젝션 내용 적용
       await queryRunner.commitTransaction();
 
       return newTicket;
     } catch (err) {
+      // 트랜젝션 실패 시 롤백
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
     }
+  }
+
+  // 공연 좌석 예매 정보 조회
+  async findSeatInfoByShowId(showId: number) {
+    const seats = await this.seatRepository.find({
+      where: { showId },
+      relations: {
+        showTime: true,
+      },
+    });
+    const now = new Date();
+    const filteredSeats = seats.filter((seat) => seat.showTime.showTime > now);
+
+    // 클라이언트에게 전달할 양식 지정
+    const seatInfo = filteredSeats.map((seat) => {
+      return {
+        id: seat.id,
+        seatNumber: seat.seatNumber,
+        grade: seat.grade,
+        price: seat.price,
+        showTimeId: seat.showTimeId,
+        showTime: seat.showTime.showTime,
+        isReserved: seat.isReserved,
+      };
+    });
+    return seatInfo;
   }
 }
