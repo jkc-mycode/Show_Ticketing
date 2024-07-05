@@ -48,6 +48,7 @@ export class UserService {
 
     const tickets = await this.ticketRepository.find({
       where: { userId },
+      order: { createdAt: 'DESC' },
     });
 
     return tickets;
