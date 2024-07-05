@@ -11,6 +11,7 @@ import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
 import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
+import { Ticket } from 'src/seat/entities/ticket.entity';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { UserService } from 'src/user/user.service';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([User, RefreshToken]),
+    TypeOrmModule.forFeature([User, RefreshToken, Ticket]),
     UserModule,
   ],
   providers: [JwtStrategy, AuthService, UserService],

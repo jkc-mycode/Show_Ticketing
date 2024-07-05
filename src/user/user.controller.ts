@@ -16,4 +16,10 @@ export class UserController {
   async getUserInfo(@UserInfo() user: User) {
     return await this.userService.findByUserId(user.id);
   }
+
+  // 사용자 예매 목록 조회
+  @Get('/tickets')
+  async findUserTicketsList(@UserInfo() user: User) {
+    return await this.userService.findUserTicketsList(user);
+  }
 }
