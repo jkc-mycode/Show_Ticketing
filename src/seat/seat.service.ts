@@ -42,13 +42,18 @@ export class SeatService {
     // 존재하는 좌석인지 체크
     const seat = await this.seatRepository.findOne({
       where: { seatNumber, showTimeId },
+      relations: { showTime: true },
     });
     if (_.isNil(seat)) {
       throw new NotFoundException('등록된 좌석이 없습니다.');
     }
+    if (seat.showTime.showTime < new Date()) {
+      throw new UnauthorizedException('이미 기간이 지난 공연입니다.');
+    }
     if (seat.isReserved) {
       throw new UnauthorizedException('이미 예매된 좌석입니다.');
     }
+
     // 사용자 잔여 포인트 확인
     if (user.point < seat.price) {
       throw new UnauthorizedException('포인트가 부족합니다.');
