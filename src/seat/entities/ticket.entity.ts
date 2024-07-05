@@ -27,27 +27,35 @@ export class Ticket {
   @Column({ type: 'int', name: 'seat_id' })
   seatId: number;
 
+  // 공연 제목
   @Column({ type: 'varchar', nullable: false })
   title: string;
 
+  // 공연 러닝타임
   @Column({ type: 'int', nullable: false })
   runningTime: number;
 
-  @Column({ type: 'date', nullable: false })
+  // 공연 시간
+  @Column({ type: 'datetime', nullable: false })
   date: Date;
 
+  // 사용자 이름
   @Column({ type: 'varchar', nullable: false })
   userName: string;
 
+  // 좌석 번호
   @Column({ type: 'int', nullable: false })
   seatNumber: number;
 
+  // 좌석 등급
   @Column({ type: 'enum', enum: Grade, nullable: false })
   grade: Grade;
 
+  // 좌석 가격
   @Column({ type: 'int', nullable: false })
   price: number;
 
+  // 공연 장소
   @Column({ type: 'varchar', nullable: false })
   place: string;
 
@@ -64,6 +72,6 @@ export class Ticket {
 
   // 사용자 엔티티와 관계 설정
   @ManyToOne(() => User, (user) => user.tickets, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'show_id' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 }

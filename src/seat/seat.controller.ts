@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { SeatService } from './seat.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UserInfo } from 'src/utils/userInfo.decorator';
@@ -9,6 +9,7 @@ import { ReserveSeatDto } from './dto/reserve-seat.dto';
 export class SeatController {
   constructor(private readonly seatService: SeatService) {}
 
+  // 공연 좌석 예매
   @UseGuards(AuthGuard('jwt'))
   @Post('/:showId')
   async reserveSeat(
@@ -17,5 +18,11 @@ export class SeatController {
     @Body() reserveSeatDto: ReserveSeatDto,
   ) {
     return await this.seatService.reserveSeat(user, +showId, reserveSeatDto);
+  }
+
+  // 공연 좌석 예매 정보 확인
+  @Get('/:showId')
+  async findSeatInfoByShowId(@Param('showId') showId: string) {
+    return await this.seatService.findSeatInfoByShowId(+showId);
   }
 }
