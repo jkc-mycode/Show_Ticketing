@@ -8,9 +8,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Grade } from '../types/grade.type';
-import { Seat } from './seat.entity';
+
 import { User } from 'src/user/entities/user.entity';
+import { Grade } from 'src/seat/types/grade.type';
+import { Seat } from 'src/seat/entities/seat.entity';
 
 @Entity({
   name: 'ticket',

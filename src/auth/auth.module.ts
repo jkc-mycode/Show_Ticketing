@@ -9,9 +9,6 @@ import { RefreshToken } from './entities/refresh-token.entity';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
-import { User } from 'src/user/entities/user.entity';
-import { UserService } from 'src/user/user.service';
-import { Ticket } from 'src/seat/entities/ticket.entity';
 
 @Module({
   imports: [
@@ -25,10 +22,10 @@ import { Ticket } from 'src/seat/entities/ticket.entity';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([User, RefreshToken, Ticket]),
+    TypeOrmModule.forFeature([RefreshToken]),
     UserModule,
   ],
-  providers: [JwtStrategy, AuthService, UserService],
+  providers: [JwtStrategy, AuthService],
   controllers: [AuthController],
 })
 export class AuthModule {}

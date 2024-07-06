@@ -16,9 +16,6 @@ import { RefreshToken } from './entities/refresh-token.entity';
 @Injectable()
 export class AuthService {
   constructor(
-    // eslint-disable-next-line prettier/prettier
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
     private userService: UserService,
 
     @InjectRepository(RefreshToken)
@@ -48,11 +45,7 @@ export class AuthService {
     const hashedPassword = await hash(password, 10);
 
     // 사용자 데이터베이스에 저장
-    const user = await this.userRepository.save({
-      email,
-      password: hashedPassword,
-      nickname,
-    });
+    const user = await this.userService.createUser(email, hashedPassword, nickname);
 
     // 비밀번호 제외하고 반환
     user.password = undefined;

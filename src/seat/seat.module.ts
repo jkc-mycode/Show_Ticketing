@@ -1,17 +1,15 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { SeatService } from './seat.service';
 import { SeatController } from './seat.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AwsModule } from 'src/aws/aws.module';
-import { Show } from 'src/show/entities/show.entity';
 import { Seat } from './entities/seat.entity';
-import { User } from 'src/user/entities/user.entity';
-import { ShowPlace } from 'src/show/entities/showPlace.entity';
-import { Ticket } from './entities/ticket.entity';
-import { ShowTime } from 'src/show/entities/showTime.entity';
 import { SeatCheckInterceptor } from './utils/seat-check.interceptor';
+import { ShowModule } from 'src/show/show.module';
+import { TicketModule } from 'src/ticket/ticket.module';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
@@ -22,8 +20,11 @@ import { SeatCheckInterceptor } from './utils/seat-check.interceptor';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Show, Seat, User, ShowPlace, Ticket, ShowTime]),
+    TypeOrmModule.forFeature([Seat]),
     AwsModule,
+    forwardRef(() => ShowModule),
+    TicketModule,
+    UserModule,
   ],
   providers: [SeatService, SeatCheckInterceptor],
   controllers: [SeatController],
