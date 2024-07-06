@@ -8,15 +8,13 @@ import _ from 'lodash';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  // eslint-disable-next-line prettier/prettier
   constructor(
-    // eslint-disable-next-line prettier/prettier
     private readonly configService: ConfigService,
     private readonly userService: UserService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
+      ignoreExpiration: true,
       secretOrKey: configService.get('JWT_SECRET_KEY'),
     });
   }
