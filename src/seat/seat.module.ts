@@ -11,6 +11,7 @@ import { User } from 'src/user/entities/user.entity';
 import { ShowPlace } from 'src/show/entities/showPlace.entity';
 import { Ticket } from './entities/ticket.entity';
 import { ShowTime } from 'src/show/entities/showTime.entity';
+import { SeatCheckInterceptor } from './utils/seat-check.interceptor';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { ShowTime } from 'src/show/entities/showTime.entity';
     TypeOrmModule.forFeature([Show, Seat, User, ShowPlace, Ticket, ShowTime]),
     AwsModule,
   ],
-  providers: [SeatService],
+  providers: [SeatService, SeatCheckInterceptor],
   controllers: [SeatController],
   exports: [SeatService],
 })
