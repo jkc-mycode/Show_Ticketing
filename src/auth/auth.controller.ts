@@ -1,17 +1,18 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Patch } from '@nestjs/common';
 import { AuthService } from './auth.service';
-// import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto } from './dto/sign-in.dto';
+import { UserInfo } from 'src/utils/userInfo.decorator';
+import { User } from 'src/user/entities/user.entity';
+import { RefreshTokenGuard } from './utils/refreshToken.guard';
 
 @Controller('auth')
 export class AuthController {
-  // eslint-disable-next-line prettier/prettier
   constructor(private readonly authService: AuthService) {}
 
   // 회원가입
-  @Post('sign-up')
-  async register(@Body() signUpDto: SignUpDto) {
+  @Post('/sign-up')
+  async signUp(@Body() signUpDto: SignUpDto) {
     return await this.authService.signUp(
       signUpDto.email,
       signUpDto.password,
@@ -21,8 +22,24 @@ export class AuthController {
   }
 
   // 로그인
-  @Post('sign-in')
-  async login(@Body() signInDto: SignInDto) {
+  @Post('/sign-in')
+  async signIn(@Body() signInDto: SignInDto) {
     return await this.authService.signIn(signInDto.email, signInDto.password);
+  }
+
+  // 로그아웃
+  // Refresh Token가 유효한지 RefreshToken 가드로 확인
+  @UseGuards(RefreshTokenGuard)
+  @Post('/sign-out')
+  async signOut(@UserInfo() user: User) {
+    return await this.authService.signOut(user);
+  }
+
+  // 토큰 재발급
+  // Refresh Token가 유효한지 RefreshToken 가드로 확인
+  @UseGuards(RefreshTokenGuard)
+  @Patch('/refresh')
+  async refresh(@UserInfo() user: User) {
+    return await this.authService.refresh(user);
   }
 }

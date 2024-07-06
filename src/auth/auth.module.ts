@@ -21,6 +21,7 @@ import { Ticket } from 'src/seat/entities/ticket.entity';
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => ({
         secret: config.get<string>('JWT_SECRET_KEY'),
+        signOptions: { expiresIn: '7d' },
       }),
       inject: [ConfigService],
     }),
