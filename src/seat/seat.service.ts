@@ -40,18 +40,12 @@ export class SeatService {
     const { seatNumber, showTimeId } = reserveSeatDto;
 
     // 존재하는 좌석인지 체크
-    const seat = await this.seatRepository.findOne({
-      where: { seatNumber, showTimeId },
-      relations: { showTime: true },
-    });
+    const seat = await this.findSeatInfo(seatNumber, showTimeId);
     if (_.isNil(seat)) {
       throw new NotFoundException('등록된 좌석이 없습니다.');
     }
     if (seat.showTime.showTime < new Date()) {
       throw new UnauthorizedException('이미 기간이 지난 공연입니다.');
-    }
-    if (seat.isReserved) {
-      throw new UnauthorizedException('이미 예매된 좌석입니다.');
     }
 
     // 사용자 잔여 포인트 확인
@@ -226,5 +220,15 @@ export class SeatService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  // 해당 좌석 정보를 반환하는 함수
+  async findSeatInfo(seatNumber: number, showTimeId: number) {
+    const seat = await this.seatRepository.findOne({
+      where: { seatNumber, showTimeId },
+      relations: { showTime: true },
+    });
+
+    return seat;
   }
 }
