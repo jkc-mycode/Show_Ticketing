@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ShowService } from './show.service';
 import { ShowController } from './show.controller';
 import { JwtModule } from '@nestjs/jwt';
@@ -10,7 +10,7 @@ import { ShowTime } from './entities/showTime.entity';
 import { ShowPlace } from './entities/showPlace.entity';
 import { ShowPrice } from './entities/showPrice.entity';
 import { AwsModule } from 'src/aws/aws.module';
-import { Seat } from 'src/seat/entities/seat.entity';
+import { SeatModule } from 'src/seat/seat.module';
 
 @Module({
   imports: [
@@ -21,8 +21,9 @@ import { Seat } from 'src/seat/entities/seat.entity';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Show, ShowImage, ShowTime, ShowPlace, ShowPrice, Seat]),
+    TypeOrmModule.forFeature([Show, ShowImage, ShowTime, ShowPlace, ShowPrice]),
     AwsModule,
+    forwardRef(() => SeatModule),
   ],
   providers: [ShowService],
   controllers: [ShowController],

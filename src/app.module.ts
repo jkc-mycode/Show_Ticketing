@@ -18,7 +18,8 @@ import { ShowPlace } from './show/entities/showPlace.entity';
 import { AwsModule } from './aws/aws.module';
 import { SeatModule } from './seat/seat.module';
 import { Seat } from './seat/entities/seat.entity';
-import { Ticket } from './seat/entities/ticket.entity';
+import { TicketModule } from './ticket/ticket.module';
+import { Ticket } from './ticket/entities/ticket.entity';
 
 const typeOrmModuleOptions = {
   // useFactory는 동적 모듈의 속성을 설정하기 위해 사용
@@ -63,6 +64,7 @@ const typeOrmModuleOptions = {
     ShowModule,
     AwsModule,
     SeatModule,
+    TicketModule,
   ],
   controllers: [AppController],
   providers: [AppService],

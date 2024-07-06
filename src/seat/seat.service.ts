@@ -1,4 +1,6 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -8,30 +10,23 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Seat } from './entities/seat.entity';
 import { DataSource, Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
-import { Show } from 'src/show/entities/show.entity';
 import { ReserveSeatDto } from './dto/reserve-seat.dto';
-import { ShowPlace } from 'src/show/entities/showPlace.entity';
 import _ from 'lodash';
-import { Ticket } from './entities/ticket.entity';
 import { Grade } from './types/grade.type';
-import { ShowTime } from 'src/show/entities/showTime.entity';
 import { CancelTicketDto } from './dto/cancel-ticket.dto';
+import { TicketService } from 'src/ticket/ticket.service';
+import { UserService } from 'src/user/user.service';
+import { ShowService } from 'src/show/show.service';
 
 @Injectable()
 export class SeatService {
   constructor(
     @InjectRepository(Seat)
     private readonly seatRepository: Repository<Seat>,
-    @InjectRepository(Show)
-    private readonly showRepository: Repository<Show>,
-    @InjectRepository(ShowPlace)
-    private readonly showPlaceRepository: Repository<ShowPlace>,
-    @InjectRepository(ShowTime)
-    private readonly showTimeRepository: Repository<ShowTime>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(Ticket)
-    private readonly ticketRepository: Repository<Ticket>,
+    private readonly userService: UserService,
+    @Inject(forwardRef(() => ShowService))
+    private readonly showService: ShowService,
+    private readonly ticketService: TicketService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -59,13 +54,11 @@ export class SeatService {
 
     try {
       // 사용자 포인트 감소
-      const updatedUser = this.userRepository.merge(user, { point: user.point - seat.price });
+      const updatedUser = this.userService.updateUserPoint(user, user.point - seat.price);
       // 좌석이 예약됨으로 변경
       const updatedSeat = this.seatRepository.merge(seat, { isReserved: true });
       // 해당 등급 좌석의 잔여 수량 변경
-      const place = await this.showPlaceRepository.findOne({
-        where: { showTimeId },
-      });
+      const place = await this.showService.findShowPlaceByShowTimeId(showTimeId);
 
       // 어떤 좌석의 수를 변경할지에 대한 객체 생성
       const condition = {};
@@ -80,27 +73,12 @@ export class SeatService {
       }
 
       // 잔여 좌석 수 변경
-      const updatedPlace = this.showPlaceRepository.merge(place, condition);
+      const updatedPlace = this.showService.updatedShowPlaceSeatCount(place, condition);
 
       // 티켓 생성
-      const show = await this.showRepository.findOne({
-        where: { id: showId },
-      });
-      const showTime = await this.showTimeRepository.findOne({
-        where: { id: showTimeId },
-      });
-      const newTicket = this.ticketRepository.create({
-        userId: user.id,
-        seatId: seat.id,
-        title: show.title,
-        runningTime: show.runningTime,
-        date: showTime.showTime,
-        userName: user.nickname,
-        seatNumber: seat.seatNumber,
-        grade: seat.grade,
-        price: seat.price,
-        place: place.placeName,
-      });
+      const show = await this.showService.findShowByShowId(showId);
+      const showTime = await this.showService.findShowTimeByShowTimeId(showTimeId);
+      const newTicket = this.ticketService.createTicket(user, show, seat, showTime, place);
 
       await Promise.all([
         queryRunner.manager.save(updatedUser),
@@ -153,9 +131,7 @@ export class SeatService {
     const { ticketId } = cancelTicketDto;
 
     // 해당 티켓이 존재하는지 확인
-    const ticket = await this.ticketRepository.findOne({
-      where: { id: ticketId },
-    });
+    const ticket = await this.ticketService.findTicketByTicketId(ticketId);
     if (_.isNil(ticket)) {
       throw new NotFoundException('예매된 티켓이 없습니다.');
     }
@@ -171,9 +147,7 @@ export class SeatService {
     });
 
     // 해당 공연의 좌석 수 조회
-    const place = await this.showPlaceRepository.findOne({
-      where: { showTimeId: seat.showTimeId },
-    });
+    const place = await this.showService.findShowPlaceByShowTimeId(seat.showTimeId);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -181,7 +155,7 @@ export class SeatService {
 
     try {
       // 사용자 포인트 환불
-      const updatedUser = this.userRepository.merge(user, { point: user.point + ticket.price });
+      const updatedUser = this.userService.updateUserPoint(user, user.point + ticket.price);
 
       // 해당 좌석 예매 상태 변경
       const updatedSeat = this.seatRepository.merge(seat, { isReserved: false });
@@ -199,10 +173,10 @@ export class SeatService {
       }
 
       // 잔여 좌석 수 변경
-      const updatedPlace = this.showPlaceRepository.merge(place, condition);
+      const updatedPlace = this.showService.updatedShowPlaceSeatCount(place, condition);
 
       // 공연 예매 취소 (티켓 isCanceled: True)
-      const canceledTicket = this.ticketRepository.merge(ticket, { isCanceled: true });
+      const canceledTicket = this.ticketService.cancelTicket(ticket);
 
       await Promise.all([
         queryRunner.manager.save(updatedUser),
@@ -224,11 +198,19 @@ export class SeatService {
 
   // 해당 좌석 정보를 반환하는 함수
   async findSeatInfo(seatNumber: number, showTimeId: number) {
-    const seat = await this.seatRepository.findOne({
+    return await this.seatRepository.findOne({
       where: { seatNumber, showTimeId },
       relations: { showTime: true },
     });
+  }
 
-    return seat;
+  createSeat(showId: number, showTimeId: number, seatNumber: number, grade: Grade, price: number) {
+    return this.seatRepository.create({
+      showId,
+      showTimeId,
+      seatNumber,
+      grade,
+      price,
+    });
   }
 }

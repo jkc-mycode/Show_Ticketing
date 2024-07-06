@@ -1,17 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { Ticket } from 'src/seat/entities/ticket.entity';
+import { TicketService } from 'src/ticket/ticket.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
-    @InjectRepository(Ticket)
-    private ticketRepository: Repository<Ticket>,
+    private readonly userRepository: Repository<User>,
+    @Inject(forwardRef(() => TicketService))
+    private readonly ticketService: TicketService,
   ) {}
+
+  // 사용자 생성
+  async createUser(email: string, password: string, nickname: string) {
+    return await this.userRepository.save({
+      email,
+      password,
+      nickname,
+    });
+  }
 
   // 사용자 ID로 사용자 조회 (사용자 프로필 조회)
   async findByUserId(id: number) {
@@ -45,12 +54,13 @@ export class UserService {
   // 사용자 예매 목록 조회
   async findUserTicketsList(user: User) {
     const userId = user.id;
-
-    const tickets = await this.ticketRepository.find({
-      where: { userId },
-      order: { createdAt: 'DESC' },
-    });
+    const tickets = await this.ticketService.findTicketsByUserId(userId);
 
     return tickets;
+  }
+
+  // 사용자 포인트 수정
+  updateUserPoint(user: User, updatedPoint: number) {
+    return this.userRepository.merge(user, { point: updatedPoint });
   }
 }

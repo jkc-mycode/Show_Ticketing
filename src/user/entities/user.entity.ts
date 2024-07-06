@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 
 import { Role } from '../types/userRole.type';
-import { Ticket } from 'src/seat/entities/ticket.entity';
+import { Ticket } from 'src/ticket/entities/ticket.entity';
 
 @Index('email', ['email'], { unique: true })
 @Entity({

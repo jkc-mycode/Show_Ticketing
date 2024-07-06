@@ -12,7 +12,7 @@ import {
 import { Grade } from '../types/grade.type';
 import { Show } from 'src/show/entities/show.entity';
 import { ShowTime } from 'src/show/entities/showTime.entity';
-import { Ticket } from './ticket.entity';
+import { Ticket } from 'src/ticket/entities/ticket.entity';
 
 @Entity({
   name: 'seat',

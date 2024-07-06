@@ -1,4 +1,10 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Show } from './entities/show.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,8 +15,8 @@ import { ShowPrice } from './entities/showPrice.entity';
 import { ShowPlace } from './entities/showPlace.entity';
 import { AwsService } from 'src/aws/aws.service';
 import { Category } from './types/showCategory.type';
-import { Seat } from 'src/seat/entities/seat.entity';
 import { Grade } from 'src/seat/types/grade.type';
+import { SeatService } from 'src/seat/seat.service';
 
 @Injectable()
 export class ShowService {
@@ -25,8 +31,8 @@ export class ShowService {
     private readonly showPriceRepository: Repository<ShowPrice>,
     @InjectRepository(ShowPlace)
     private readonly showPlaceRepository: Repository<ShowPlace>,
-    @InjectRepository(Seat)
-    private readonly seatRepository: Repository<Seat>,
+    @Inject(forwardRef(() => SeatService))
+    private readonly seatService: SeatService,
     private readonly dataSource: DataSource,
     private readonly awsService: AwsService,
   ) {}
@@ -126,13 +132,13 @@ export class ShowService {
         // A 좌석 데이터 저장
         for (let i = 1; i <= showPlace[k].seatA; i++) {
           await queryRunner.manager.save(
-            this.seatRepository.create({
-              showId: show.id,
-              showTimeId: showPlace[k].showTimeId,
+            this.seatService.createSeat(
+              show.id,
+              showPlace[k].showTimeId,
               seatNumber,
-              grade: Grade.A,
-              price: showPrice.priceA,
-            }),
+              Grade.A,
+              showPrice.priceA,
+            ),
           );
           seatNumber++;
         }
@@ -140,13 +146,13 @@ export class ShowService {
         // S 좌석 데이터 저장
         for (let i = 1; i <= showPlace[k].seatS; i++) {
           await queryRunner.manager.save(
-            this.seatRepository.create({
-              showId: show.id,
-              showTimeId: showPlace[k].showTimeId,
+            this.seatService.createSeat(
+              show.id,
+              showPlace[k].showTimeId,
               seatNumber,
-              grade: Grade.S,
-              price: showPrice.priceS,
-            }),
+              Grade.S,
+              showPrice.priceS,
+            ),
           );
           seatNumber++;
         }
@@ -154,13 +160,13 @@ export class ShowService {
         // R 좌석 데이터 저장
         for (let i = 1; i <= showPlace[k].seatR; i++) {
           await queryRunner.manager.save(
-            this.seatRepository.create({
-              showId: show.id,
-              showTimeId: showPlace[k].showTimeId,
+            this.seatService.createSeat(
+              show.id,
+              showPlace[k].showTimeId,
               seatNumber,
-              grade: Grade.R,
-              price: showPrice.priceR,
-            }),
+              Grade.R,
+              showPrice.priceR,
+            ),
           );
           seatNumber++;
         }
@@ -168,13 +174,13 @@ export class ShowService {
         // Vip 좌석 데이터 저장
         for (let i = 1; i <= showPlace[k].seatVip; i++) {
           await queryRunner.manager.save(
-            this.seatRepository.create({
-              showId: show.id,
-              showTimeId: showPlace[k].showTimeId,
+            this.seatService.createSeat(
+              show.id,
+              showPlace[k].showTimeId,
               seatNumber,
-              grade: Grade.VIP,
-              price: showPrice.priceVip,
-            }),
+              Grade.VIP,
+              showPrice.priceVip,
+            ),
           );
           seatNumber++;
         }
@@ -314,5 +320,31 @@ export class ShowService {
     };
 
     return searchedShow;
+  }
+
+  // 공연 ID를 통해 공연 정보 반환
+  async findShowByShowId(showId: number) {
+    return await this.showRepository.findOne({
+      where: { id: showId },
+    });
+  }
+
+  // 공연 시간 ID를 통해 공연 장소 정보 반환(좌석 수)
+  async findShowPlaceByShowTimeId(showTimeId: number) {
+    return await this.showPlaceRepository.findOne({
+      where: { showTimeId },
+    });
+  }
+
+  // 공연 시간 ID를 통해 공연 시간 정보 반환
+  async findShowTimeByShowTimeId(showTimeId: number) {
+    return await this.showTimeRepository.findOne({
+      where: { id: showTimeId },
+    });
+  }
+
+  // 공연 장소의 좌석 수 수정
+  updatedShowPlaceSeatCount(place: ShowPlace, condition: object) {
+    return this.showPlaceRepository.merge(place, condition);
   }
 }
