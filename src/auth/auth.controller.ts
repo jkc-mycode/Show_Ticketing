@@ -2,9 +2,9 @@ import { Controller, Post, Body, UseGuards, Patch } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto } from './dto/sign-in.dto';
-import { UserInfo } from 'src/utils/userInfo.decorator';
+import { UserInfo } from 'src/utils/user-info.decorator';
 import { User } from 'src/user/entities/user.entity';
-import { RefreshTokenGuard } from './utils/refreshToken.guard';
+import { RefreshTokenGuard } from './utils/refresh-token.guard';
 
 @Controller('auth')
 export class AuthController {

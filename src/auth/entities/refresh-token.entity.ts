@@ -1,3 +1,4 @@
+import { AUTH_CONSTANT } from 'src/constants/auth/auth.constant';
 import {
   Column,
   CreateDateColumn,
@@ -7,7 +8,7 @@ import {
 } from 'typeorm';
 
 @Entity({
-  name: 'refresh_token',
+  name: AUTH_CONSTANT.ENTITY.NAME,
 })
 export class RefreshToken {
   @PrimaryGeneratedColumn()

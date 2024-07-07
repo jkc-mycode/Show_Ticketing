@@ -1,11 +1,12 @@
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { AUTH_MESSAGE } from 'src/constants/auth/auth.message.constant';
 
 export class SignInDto {
   @IsEmail()
-  @IsNotEmpty({ message: '이메일을 입력해주세요.' })
+  @IsNotEmpty({ message: AUTH_MESSAGE.DTO.EMAIL.IS_NOT_EMPTY })
   email: string;
 
   @IsString()
-  @IsNotEmpty({ message: '비밀번호를 입력해주세요.' })
+  @IsNotEmpty({ message: AUTH_MESSAGE.DTO.PASSWORD.IS_NOT_EMPTY })
   password: string;
 }

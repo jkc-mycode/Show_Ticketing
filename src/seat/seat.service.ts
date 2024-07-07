@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -13,10 +14,12 @@ import { User } from 'src/user/entities/user.entity';
 import { ReserveSeatDto } from './dto/reserve-seat.dto';
 import _ from 'lodash';
 import { Grade } from './types/grade.type';
-import { CancelTicketDto } from './dto/cancel-ticket.dto';
 import { TicketService } from 'src/ticket/ticket.service';
 import { UserService } from 'src/user/user.service';
 import { ShowService } from 'src/show/show.service';
+import { CancelTicketDto } from 'src/ticket/dto/cancel-ticket.dto';
+import { SEAT_MESSAGE } from 'src/constants/seat/seat.message.constant';
+import { SEAT_CONSTANT } from 'src/constants/seat/seat.constant';
 
 @Injectable()
 export class SeatService {
@@ -34,18 +37,30 @@ export class SeatService {
   async reserveSeat(user: User, showId: number, reserveSeatDto: ReserveSeatDto) {
     const { seatNumber, showTimeId } = reserveSeatDto;
 
+    // 존재하는 공연인지 체크
+    const show = await this.showService.findShowByShowId(showId);
+    if (_.isNil(show)) {
+      throw new NotFoundException(SEAT_MESSAGE.RESERVE_SEAT.SHOW.NOT_FOUND);
+    }
+
+    // 존재하는 공연 시간인지 체크
+    const showTime = await this.showService.findShowTimeByShowTimeId(showTimeId);
+    if (_.isNil(showTime)) {
+      throw new NotFoundException(SEAT_MESSAGE.RESERVE_SEAT.SHOW_TIME.NOT_FOUND);
+    }
+
     // 존재하는 좌석인지 체크
     const seat = await this.findSeatInfo(seatNumber, showTimeId);
     if (_.isNil(seat)) {
-      throw new NotFoundException('등록된 좌석이 없습니다.');
+      throw new NotFoundException(SEAT_MESSAGE.RESERVE_SEAT.SEAT.NOT_FOUND);
     }
     if (seat.showTime.showTime < new Date()) {
-      throw new UnauthorizedException('이미 기간이 지난 공연입니다.');
+      throw new BadRequestException(SEAT_MESSAGE.RESERVE_SEAT.SEAT.SHOW_TIME_OVER);
     }
 
     // 사용자 잔여 포인트 확인
     if (user.point < seat.price) {
-      throw new UnauthorizedException('포인트가 부족합니다.');
+      throw new BadRequestException(SEAT_MESSAGE.RESERVE_SEAT.USER.NO_POINT);
     }
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -63,21 +78,19 @@ export class SeatService {
       // 어떤 좌석의 수를 변경할지에 대한 객체 생성
       const condition = {};
       if (seat.grade === Grade.A) {
-        condition['seatA'] = place.seatA - 1;
+        condition[SEAT_CONSTANT.COMMON.SEAT_GRADE.SEAT_A] = place.seatA - 1;
       } else if (seat.grade === Grade.S) {
-        condition['seatS'] = place.seatS - 1;
+        condition[SEAT_CONSTANT.COMMON.SEAT_GRADE.SEAT_S] = place.seatS - 1;
       } else if (seat.grade === Grade.R) {
-        condition['seatR'] = place.seatR - 1;
+        condition[SEAT_CONSTANT.COMMON.SEAT_GRADE.SEAT_R] = place.seatR - 1;
       } else {
-        condition['seatVip'] = place.seatVip - 1;
+        condition[SEAT_CONSTANT.COMMON.SEAT_GRADE.SEAT_VIP] = place.seatVip - 1;
       }
 
       // 잔여 좌석 수 변경
       const updatedPlace = this.showService.updatedShowPlaceSeatCount(place, condition);
 
       // 티켓 생성
-      const show = await this.showService.findShowByShowId(showId);
-      const showTime = await this.showService.findShowTimeByShowTimeId(showTimeId);
       const newTicket = this.ticketService.createTicket(user, show, seat, showTime, place);
 
       await Promise.all([
@@ -94,7 +107,7 @@ export class SeatService {
     } catch (err) {
       // 트랜젝션 실패 시 롤백
       await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException('좌석 예매에 실패했습니다.');
+      throw new InternalServerErrorException(SEAT_MESSAGE.RESERVE_SEAT.FAIL);
     } finally {
       await queryRunner.release();
     }
@@ -127,18 +140,21 @@ export class SeatService {
   }
 
   // 공연 예매 취소
-  async cancelTicket(user: User, cancelTicketDto: CancelTicketDto) {
+  async cancelSeat(user: User, cancelTicketDto: CancelTicketDto) {
     const { ticketId } = cancelTicketDto;
 
     // 해당 티켓이 존재하는지 확인
     const ticket = await this.ticketService.findTicketByTicketId(ticketId);
     if (_.isNil(ticket)) {
-      throw new NotFoundException('예매된 티켓이 없습니다.');
+      throw new BadRequestException(SEAT_MESSAGE.CANCEL_SEAT.TICKET.NOT_FOUND);
+    }
+    if (ticket.isCanceled === true) {
+      throw new BadRequestException(SEAT_MESSAGE.CANCEL_SEAT.TICKET.CANCELED);
     }
 
     // 티켓의 소유자와 로그인한 사용자가 같은지 확인
     if (ticket.userId !== user.id) {
-      throw new UnauthorizedException('접근 권한이 없습니다.');
+      throw new UnauthorizedException(SEAT_MESSAGE.CANCEL_SEAT.TICKET.NOT_MINE);
     }
 
     // 해당 좌석 조회
@@ -163,13 +179,13 @@ export class SeatService {
       // 어떤 좌석의 수를 변경할지에 대한 객체 생성
       const condition = {};
       if (seat.grade === Grade.A) {
-        condition['seatA'] = place.seatA + 1;
+        condition[SEAT_CONSTANT.COMMON.SEAT_GRADE.SEAT_A] = place.seatA + 1;
       } else if (seat.grade === Grade.S) {
-        condition['seatS'] = place.seatS + 1;
+        condition[SEAT_CONSTANT.COMMON.SEAT_GRADE.SEAT_S] = place.seatS + 1;
       } else if (seat.grade === Grade.R) {
-        condition['seatR'] = place.seatR + 1;
+        condition[SEAT_CONSTANT.COMMON.SEAT_GRADE.SEAT_R] = place.seatR + 1;
       } else {
-        condition['seatVip'] = place.seatVip + 1;
+        condition[SEAT_CONSTANT.COMMON.SEAT_GRADE.SEAT_VIP] = place.seatVip + 1;
       }
 
       // 잔여 좌석 수 변경
@@ -187,10 +203,10 @@ export class SeatService {
 
       await queryRunner.commitTransaction();
 
-      return { message: '공연 예매 취소에 성공했습니다.' };
+      return { message: SEAT_MESSAGE.CANCEL_SEAT.SUCCEED };
     } catch (err) {
       await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException('공연 예매 취소에 실패했습니다.');
+      throw new InternalServerErrorException(SEAT_MESSAGE.CANCEL_SEAT.FAIL);
     } finally {
       await queryRunner.release();
     }

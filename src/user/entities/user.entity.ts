@@ -8,8 +8,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { Role } from '../types/userRole.type';
+import { Role } from '../types/user-role.type';
 import { Ticket } from 'src/ticket/entities/ticket.entity';
+import { USER_CONSTANT } from 'src/constants/user/user.constant';
 
 @Index('email', ['email'], { unique: true })
 @Entity({
@@ -31,7 +32,7 @@ export class User {
   @Column({ type: 'enum', enum: Role, default: Role.USER })
   role: Role;
 
-  @Column({ type: 'int', default: 1000000 })
+  @Column({ type: 'int', default: USER_CONSTANT.ENTITY.DEFAULT_POINT })
   point: number;
 
   @CreateDateColumn()

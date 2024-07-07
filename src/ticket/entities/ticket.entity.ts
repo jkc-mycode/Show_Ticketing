@@ -4,7 +4,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -12,20 +11,21 @@ import {
 import { User } from 'src/user/entities/user.entity';
 import { Grade } from 'src/seat/types/grade.type';
 import { Seat } from 'src/seat/entities/seat.entity';
+import { TICKET_CONSTANT } from 'src/constants/ticket/ticket.constant';
 
 @Entity({
-  name: 'ticket',
+  name: TICKET_CONSTANT.ENTITY.TICKET.NAME,
 })
 export class Ticket {
   @PrimaryGeneratedColumn()
   id: number;
 
   // 사용자 외래키 설정
-  @Column({ type: 'int', name: 'user_id' })
+  @Column({ type: 'int', name: TICKET_CONSTANT.ENTITY.COMMON.USER_ID })
   userId: number;
 
   // 좌석 외래키 설정
-  @Column({ type: 'int', name: 'seat_id' })
+  @Column({ type: 'int', name: TICKET_CONSTANT.ENTITY.COMMON.SEAT_ID })
   seatId: number;
 
   // 공연 제목
@@ -71,12 +71,12 @@ export class Ticket {
   updatedAt: Date;
 
   // 좌석 엔티티와 관계 설정
-  @OneToOne(() => Seat, (seat) => seat.ticket)
-  @JoinColumn({ name: 'seat_id' })
+  @ManyToOne(() => Seat, (seat) => seat.ticket)
+  @JoinColumn({ name: TICKET_CONSTANT.ENTITY.COMMON.SEAT_ID })
   seats: Seat;
 
   // 사용자 엔티티와 관계 설정
   @ManyToOne(() => User, (user) => user.tickets, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: TICKET_CONSTANT.ENTITY.COMMON.USER_ID })
   user: User;
 }

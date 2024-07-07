@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
 import { SeatService } from '../seat.service';
+import { SEAT_MESSAGE } from 'src/constants/seat/seat.message.constant';
 
 @Injectable()
 export class SeatCheckInterceptor implements NestInterceptor {
@@ -19,7 +20,7 @@ export class SeatCheckInterceptor implements NestInterceptor {
     // 예매 여부 체크
     const seat = await this.seatService.findSeatInfo(seatNumber, showTimeId);
     if (seat.isReserved) {
-      throw new BadRequestException('해당 좌석은 이미 예매되었습니다.');
+      throw new BadRequestException(SEAT_MESSAGE.COMMON.SEAT_CHECK.RESERVED);
     }
 
     return next.handle().pipe(

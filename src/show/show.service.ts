@@ -9,14 +9,15 @@ import { DataSource, Repository } from 'typeorm';
 import { Show } from './entities/show.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateShowDto } from './dto/create-show.dto';
-import { ShowImage } from './entities/showImage.entity';
-import { ShowTime } from './entities/showTime.entity';
-import { ShowPrice } from './entities/showPrice.entity';
-import { ShowPlace } from './entities/showPlace.entity';
+import { ShowImage } from './entities/show-image.entity';
+import { ShowTime } from './entities/show-time.entity';
+import { ShowPrice } from './entities/show-price.entity';
+import { ShowPlace } from './entities/show-place.entity';
 import { AwsService } from 'src/aws/aws.service';
-import { Category } from './types/showCategory.type';
+import { Category } from './types/show-category.type';
 import { Grade } from 'src/seat/types/grade.type';
 import { SeatService } from 'src/seat/seat.service';
+import { SHOW_MESSAGE } from 'src/constants/show/show.message.constant';
 
 @Injectable()
 export class ShowService {
@@ -76,7 +77,7 @@ export class ShowService {
       await queryRunner.manager.save(show);
 
       // 이미지 데이터를 업로드
-      images = await this.awsService.imageUpload(files);
+      images = await this.awsService.uploadImage(files);
 
       // show_price 테이블에 데이터 저장
       const showPrice = this.showPriceRepository.create({
@@ -210,7 +211,7 @@ export class ShowService {
       await queryRunner.rollbackTransaction();
       // 트랜젝션 실패 시 S3 이미지도 롤백
       await this.awsService.rollbackS3Image(images);
-      throw new InternalServerErrorException('공연 등록에 실패했습니다.');
+      throw new InternalServerErrorException(SHOW_MESSAGE.CREATE_SHOW.FAIL);
     } finally {
       await queryRunner.release();
     }
@@ -288,7 +289,7 @@ export class ShowService {
       },
     });
     if (!show) {
-      throw new NotFoundException('등록된 공연 정보가 없습니다.');
+      throw new NotFoundException(SHOW_MESSAGE.FIND_SHOW_DETAIL.SHOW.NOT_FOUND);
     }
 
     // 출력 형식 지정
