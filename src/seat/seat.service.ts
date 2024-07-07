@@ -148,8 +148,17 @@ export class SeatService {
     if (_.isNil(ticket)) {
       throw new BadRequestException(SEAT_MESSAGE.CANCEL_SEAT.TICKET.NOT_FOUND);
     }
+
+    // 이미 취소된 티켓일 때
     if (ticket.isCanceled === true) {
       throw new BadRequestException(SEAT_MESSAGE.CANCEL_SEAT.TICKET.CANCELED);
+    }
+
+    // 공연 시작 3시간 전에 취소하는지 확인
+    const now = new Date();
+    now.setHours(now.getHours() + 3);
+    if (now > ticket.date) {
+      throw new BadRequestException(SEAT_MESSAGE.CANCEL_SEAT.TICKET.TIME_LIMIT);
     }
 
     // 티켓의 소유자와 로그인한 사용자가 같은지 확인

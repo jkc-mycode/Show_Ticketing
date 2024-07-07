@@ -35,6 +35,7 @@ export const SEAT_MESSAGE = {
       NOT_FOUND: '예매된 티켓이 없습니다.',
       CANCELED: '이미 취소된 예매입니다.',
       NOT_MINE: '접근 권한이 없습니다.',
+      TIME_LIMIT: '공연 시작 3시간 전까지만 취소 가능합니다.',
     },
     SUCCEED: '공연 예매 취소에 성공했습니다.',
     FAIL: '공연 예매 취소에 실패했습니다.',
