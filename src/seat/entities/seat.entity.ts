@@ -5,17 +5,18 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Grade } from '../types/grade.type';
 import { Show } from 'src/show/entities/show.entity';
-import { ShowTime } from 'src/show/entities/showTime.entity';
+import { ShowTime } from 'src/show/entities/show-time.entity';
 import { Ticket } from 'src/ticket/entities/ticket.entity';
+import { SEAT_CONSTANT } from 'src/constants/seat/seat.constant';
 
 @Entity({
-  name: 'seat',
+  name: SEAT_CONSTANT.ENTITY.NAME,
 })
 export class Seat {
   @PrimaryGeneratedColumn()
@@ -23,12 +24,12 @@ export class Seat {
 
   // 공연 외래키 설정
   @Index()
-  @Column({ type: 'int', name: 'show_id' })
+  @Column({ type: 'int', name: SEAT_CONSTANT.ENTITY.SHOW_ID })
   showId: number;
 
   // 공연 시간 외래키 설정
   @Index()
-  @Column({ type: 'int', name: 'show_time_id' })
+  @Column({ type: 'int', name: SEAT_CONSTANT.ENTITY.SHOW_TIME_ID })
   showTimeId: number;
 
   // 좌석 번호
@@ -55,15 +56,15 @@ export class Seat {
 
   // 공연 엔티티와 관계 설정
   @ManyToOne(() => Show, (show) => show.seats, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'show_id' })
+  @JoinColumn({ name: SEAT_CONSTANT.ENTITY.SHOW_ID })
   show: Show;
 
   // 공연 시간 엔티티와 관계 설정
   @ManyToOne(() => ShowTime, (showTime) => showTime.seats, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'show_time_id' })
+  @JoinColumn({ name: SEAT_CONSTANT.ENTITY.SHOW_TIME_ID })
   showTime: ShowTime;
 
   // 티켓 엔티티와 관계 설정
-  @OneToOne(() => Ticket, (ticket) => ticket.seats)
-  ticket: Ticket;
+  @OneToMany(() => Ticket, (ticket) => ticket.seats)
+  ticket: Ticket[];
 }

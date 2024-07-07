@@ -8,15 +8,16 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Category } from '../types/showCategory.type';
-import { ShowImage } from './showImage.entity';
-import { ShowTime } from './showTime.entity';
-import { ShowPrice } from './showPrice.entity';
-import { ShowPlace } from './showPlace.entity';
+import { Category } from '../types/show-category.type';
+import { ShowImage } from './show-image.entity';
+import { ShowTime } from './show-time.entity';
+import { ShowPrice } from './show-price.entity';
+import { ShowPlace } from './show-place.entity';
 import { Seat } from 'src/seat/entities/seat.entity';
+import { SHOW_CONSTANT } from 'src/constants/show/show.constant';
 
 @Entity({
-  name: 'show',
+  name: SHOW_CONSTANT.ENTITY.SHOW.NAME,
 })
 export class Show {
   @PrimaryGeneratedColumn()

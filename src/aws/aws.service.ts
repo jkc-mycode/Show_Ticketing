@@ -3,6 +3,8 @@ import { PutObjectCommand, S3, S3Client } from '@aws-sdk/client-s3';
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import path from 'path';
+import { AWS_CONSTANT } from 'src/constants/aws/aws.constant';
+import { AWS_MESSAGE } from 'src/constants/aws/aws.message.constant';
 
 @Injectable()
 export class AwsService {
@@ -12,18 +14,18 @@ export class AwsService {
   constructor(private configService: ConfigService) {
     // AWS S3 클라이언트 초기화. 환경 설정 정보를 사용하여 AWS 리전, Access Key, Secret Key를 설정.
     this.s3Client = new S3Client({
-      region: this.configService.get('AWS_S3_REGION'), // AWS Region
+      region: this.configService.get(AWS_CONSTANT.CONFIG_SERVICE.AWS_S3_REGION), // AWS Region
       credentials: {
-        accessKeyId: this.configService.get('AWS_S3_ACCESS_KEY'), // Access Key
-        secretAccessKey: this.configService.get('AWS_S3_SECRET_KEY'), // Secret Key
+        accessKeyId: this.configService.get(AWS_CONSTANT.CONFIG_SERVICE.AWS_S3_ACCESS_KEY), // Access Key
+        secretAccessKey: this.configService.get(AWS_CONSTANT.CONFIG_SERVICE.AWS_S3_SECRET_KEY), // Secret Key
       },
     });
     // AWS S3 초기화. 환경 설정 정보를 사용하여 AWS 리전, Access Key, Secret Key를 설정.
     this.s3 = new S3({
-      region: this.configService.get('AWS_S3_REGION'), // AWS Region
+      region: this.configService.get(AWS_CONSTANT.CONFIG_SERVICE.AWS_S3_REGION), // AWS Region
       credentials: {
-        accessKeyId: this.configService.get('AWS_S3_ACCESS_KEY'), // Access Key
-        secretAccessKey: this.configService.get('AWS_S3_SECRET_KEY'), // Secret Key
+        accessKeyId: this.configService.get(AWS_CONSTANT.CONFIG_SERVICE.AWS_S3_ACCESS_KEY), // Access Key
+        secretAccessKey: this.configService.get(AWS_CONSTANT.CONFIG_SERVICE.AWS_S3_SECRET_KEY), // Secret Key
       },
     });
   }
@@ -37,7 +39,7 @@ export class AwsService {
     try {
       // AWS S3에 이미지 업로드 명령을 생성합니다. 파일 이름, 파일 버퍼, 파일 접근 권한, 파일 타입 등을 설정합니다.
       const command = new PutObjectCommand({
-        Bucket: this.configService.get('AWS_BUCKET'), // S3 버킷 이름
+        Bucket: this.configService.get(AWS_CONSTANT.CONFIG_SERVICE.AWS_BUCKET), // S3 버킷 이름
         Key: fileName, // 업로드될 파일의 이름
         Body: file.buffer, // 업로드할 파일
         ACL: 'public-read', // 파일 접근 권한
@@ -50,17 +52,17 @@ export class AwsService {
       return `https://s3.${process.env.AWS_S3_REGION}.amazonaws.com/${process.env.AWS_BUCKET}/${fileName}`;
     } catch (err) {
       console.log(err);
-      throw new InternalServerErrorException('관리자에게 문의해 주세요.');
+      throw new InternalServerErrorException(AWS_MESSAGE.S3.UPLOAD_TO_S3.FAIL);
     }
   }
 
   // 받아온 파일 데이터 가공해서 aws 서비스에 전달
-  async imageUpload(files: Express.Multer.File[]) {
+  async uploadImage(files: Express.Multer.File[]) {
     if (files.length === 0) {
-      throw new BadRequestException('공연 이미지를 업로드해 주세요.');
+      throw new BadRequestException(AWS_MESSAGE.S3.UPLOAD_IMAGE.NO_FILE);
     }
 
-    const allowedExtensions = ['.png', '.jpg', '.jpeg', '.bmp', '.gif'];
+    const allowedExtensions = AWS_CONSTANT.EXTENSION_LIST;
 
     // 오늘 날짜 구하기
     const today = new Date();
@@ -82,7 +84,7 @@ export class AwsService {
         // 확장자 검사
         const extension = path.extname(file.originalname).toLowerCase();
         if (!allowedExtensions.includes(extension)) {
-          throw new Error('확장자 에러');
+          throw new BadRequestException(AWS_MESSAGE.S3.UPLOAD_IMAGE.NOT_ALLOWED_EXTENSION);
         }
 
         const imageName = `test/${date}_${randomNumber}`;
@@ -118,7 +120,7 @@ export class AwsService {
   async deleteImage(key: string) {
     try {
       const params = {
-        Bucket: this.configService.get('AWS_BUCKET'),
+        Bucket: this.configService.get(AWS_CONSTANT.CONFIG_SERVICE.AWS_BUCKET),
         Key: key,
       };
 

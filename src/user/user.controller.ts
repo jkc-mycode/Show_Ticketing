@@ -1,11 +1,12 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '@nestjs/passport';
-import { UserInfo } from 'src/utils/userInfo.decorator';
+import { UserInfo } from 'src/utils/user-info.decorator';
 import { User } from './entities/user.entity';
+import { USER_CONSTANT } from 'src/constants/user/user.constant';
 
 // 여기서의 가드는 역할을 따지지 않고 로그인했는지만 확인함
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard(USER_CONSTANT.COMMON.JWT))
 @Controller('users')
 export class UserController {
   // eslint-disable-next-line prettier/prettier

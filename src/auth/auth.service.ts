@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -12,6 +13,8 @@ import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { AUTH_CONSTANT } from 'src/constants/auth/auth.constant';
+import { AUTH_MESSAGE } from 'src/constants/auth/auth.message.constant';
 
 @Injectable()
 export class AuthService {
@@ -26,23 +29,23 @@ export class AuthService {
   // 회원가입
   async signUp(email: string, password: string, passwordCheck: string, nickname: string) {
     if (password !== passwordCheck) {
-      throw new BadRequestException('비밀번호 확인과 일치하지 않습니다.');
+      throw new BadRequestException(AUTH_MESSAGE.SIGN_UP.PASSWORD.BAD_REQUEST);
     }
 
     // 이메일 중복 체크
     let existedUser = await this.userService.findByEmail(email);
     if (existedUser) {
-      throw new ConflictException('이미 해당 이메일로 가입된 사용자가 있습니다.');
+      throw new ConflictException(AUTH_MESSAGE.SIGN_UP.EMAIL.CONFLICT);
     }
 
     // 닉네임 중복 체크
     existedUser = await this.userService.findByNickname(nickname);
     if (existedUser) {
-      throw new ConflictException('이미 해당 닉네임으로 가입된 사용자가 있습니다.');
+      throw new ConflictException(AUTH_MESSAGE.SIGN_UP.NICKNAME.CONFLICT);
     }
 
     // 비밀번호 암호화
-    const hashedPassword = await hash(password, 10);
+    const hashedPassword = await hash(password, AUTH_CONSTANT.COMMON.HASH.SALT);
 
     // 사용자 데이터베이스에 저장
     const user = await this.userService.createUser(email, hashedPassword, nickname);
@@ -57,17 +60,20 @@ export class AuthService {
     // 이메일로 사용자 조회 (비밀번호 있는 데이터 가져오기)
     const user = await this.userService.findByEmail(email, true);
     if (_.isNil(user)) {
-      throw new UnauthorizedException('일치하는 사용자가 없습니다.');
+      throw new NotFoundException(AUTH_MESSAGE.COMMON.USER.NOT_FOUND);
     }
 
     // 암호화된 비밀번호 일치 검사
     const isComparePassword = await compare(password, user.password);
     if (!isComparePassword) {
-      throw new UnauthorizedException('비밀번호가 틀렸습니다.');
+      throw new UnauthorizedException(AUTH_MESSAGE.SIGN_IN.PASSWORD.UNAUTHORIZED);
     }
 
     // 토큰 발급
-    const accessToken = this.jwtService.sign({ id: user.id }, { expiresIn: '7h' });
+    const accessToken = this.jwtService.sign(
+      { id: user.id },
+      { expiresIn: AUTH_CONSTANT.JWT.ACCESS_EXPIRES_IN },
+    );
     const refreshToken = this.jwtService.sign(
       { id: user.id },
       { secret: process.env.REFRESH_SECRET_KEY },
@@ -79,7 +85,7 @@ export class AuthService {
         userId: user.id,
         token: refreshToken,
       },
-      ['token'],
+      [AUTH_CONSTANT.COMMON.REFRESH_TOKEN.COLUMN_NAME],
     );
 
     return { accessToken, refreshToken };
@@ -103,20 +109,23 @@ export class AuthService {
     });
 
     if (refreshToken.token === '') {
-      throw new UnauthorizedException('이미 로그아웃되었습니다.');
+      throw new BadRequestException(AUTH_MESSAGE.SIGN_OUT.EXIST);
     }
 
     // Refresh Token 삭제 (soft delete)
     await this.refreshTokenRepository.update({ userId: user.id }, { token: null });
 
-    return { message: '로그아웃에 성공했습니다.' };
+    return { message: AUTH_MESSAGE };
   }
 
   // 토큰 재발급
   async refresh(user: User) {
     // 토큰 발급
     console.log(user);
-    const accessToken = this.jwtService.sign({ id: user.id }, { expiresIn: '7h' });
+    const accessToken = this.jwtService.sign(
+      { id: user.id },
+      { expiresIn: AUTH_CONSTANT.JWT.ACCESS_EXPIRES_IN },
+    );
     const refreshToken = this.jwtService.sign(
       { id: user.id },
       { secret: process.env.REFRESH_SECRET_KEY },
@@ -128,7 +137,7 @@ export class AuthService {
         userId: user.id,
         token: refreshToken,
       },
-      ['token'],
+      [AUTH_CONSTANT.COMMON.REFRESH_TOKEN.COLUMN_NAME],
     );
 
     return { accessToken, refreshToken };

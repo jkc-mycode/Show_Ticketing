@@ -9,21 +9,22 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Show } from './show.entity';
-import { ShowTime } from './showTime.entity';
+import { ShowTime } from './show-time.entity';
+import { SHOW_CONSTANT } from 'src/constants/show/show.constant';
 
 @Entity({
-  name: 'show_place',
+  name: SHOW_CONSTANT.ENTITY.SHOW_PLACE.NAME,
 })
 export class ShowPlace {
   @PrimaryGeneratedColumn()
   id: number;
 
   // 공연 외래키 설정
-  @Column({ type: 'int', name: 'show_id' })
+  @Column({ type: 'int', name: SHOW_CONSTANT.ENTITY.COMMON.SHOW_ID })
   showId: number;
 
   // 공연 시간 외래키 설정
-  @Column({ type: 'int', name: 'show_time_id' })
+  @Column({ type: 'int', name: SHOW_CONSTANT.ENTITY.COMMON.SHOW_TIME_ID })
   showTimeId: number;
 
   @Column({ type: 'varchar', nullable: false })
@@ -52,11 +53,11 @@ export class ShowPlace {
 
   // 공연 엔티티와 관계 설정
   @ManyToOne(() => Show, (show) => show.showPlace, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'show_id' })
+  @JoinColumn({ name: SHOW_CONSTANT.ENTITY.COMMON.SHOW_ID })
   show: Show;
 
   // 공연 시간 엔티티와 관계 설정
   @OneToOne(() => ShowTime, (showTime) => showTime.showPlace, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'show_time_id' })
+  @JoinColumn({ name: SHOW_CONSTANT.ENTITY.COMMON.SHOW_TIME_ID })
   showTime: ShowTime;
 }

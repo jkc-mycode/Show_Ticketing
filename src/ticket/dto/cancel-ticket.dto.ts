@@ -1,8 +1,9 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
+import { TICKET_MESSAGE } from 'src/constants/ticket/ticket.message.constant';
 
 export class CancelTicketDto {
   // 티켓 ID
   @IsNumber()
-  @IsNotEmpty({ message: '티켓 ID를 입력해 주세요.' })
+  @IsNotEmpty({ message: TICKET_MESSAGE.DTO.CANCEL.TICKET_ID.IS_NOT_EMPTY })
   ticketId: number;
 }

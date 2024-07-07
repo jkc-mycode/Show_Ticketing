@@ -12,19 +12,24 @@ import {
 import { ShowService } from './show.service';
 import { CreateShowDto } from './dto/create-show.dto';
 import { Roles } from 'src/auth/utils/roles.decorator';
-import { Role } from 'src/user/types/userRole.type';
+import { Role } from 'src/user/types/user-role.type';
 import { RolesGuard } from 'src/auth/utils/roles.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { SHOW_CONSTANT } from 'src/constants/show/show.constant';
 
 @Controller('shows')
 export class ShowController {
-  // eslint-disable-next-line prettier/prettier
   constructor(private readonly showService: ShowService) {}
 
   // 공연 등록 (ADMIN만 사용 가능)
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
-  @UseInterceptors(FilesInterceptor('files', 10))
+  @UseInterceptors(
+    FilesInterceptor(
+      SHOW_CONSTANT.COMMON.FILES_INTERCEPTOR.NAME,
+      SHOW_CONSTANT.COMMON.FILES_INTERCEPTOR.MAX_COUNT,
+    ),
+  )
   @Post()
   async createShow(
     @Body() createShowDto: CreateShowDto,
