@@ -1,6 +1,7 @@
 export const AUTH_CONSTANT = {
   ENTITY: {
     NAME: 'refresh_token',
+    USER_ID: 'user_id',
   },
   UTIL: {
     AUTHORIZATION: 'authorization',
