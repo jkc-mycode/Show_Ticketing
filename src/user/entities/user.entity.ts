@@ -4,6 +4,7 @@ import {
   Entity,
   Index,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -11,6 +12,7 @@ import {
 import { Role } from '../types/user-role.type';
 import { Ticket } from 'src/ticket/entities/ticket.entity';
 import { USER_CONSTANT } from 'src/constants/user/user.constant';
+import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 
 @Index('email', ['email'], { unique: true })
 @Entity({
@@ -40,6 +42,9 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshToken: RefreshToken;
 
   @OneToMany(() => Ticket, (tickets) => tickets.user)
   tickets: Ticket[];
