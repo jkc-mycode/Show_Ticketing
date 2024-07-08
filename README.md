@@ -351,37 +351,37 @@
 ![로그인 API](./imgs/sign-in.png)
 
 - 로그아웃 API
-![로그아웃 API](./imgs/user_info.png)
+![로그아웃 API](./imgs/sign-out.png)
 
 - 토큰 재발급 API
-![토큰 재발급 API](./imgs/resume_create.png)
+![토큰 재발급 API](./imgs/refresh.png)
 
 - 사용자 프로필 조회 API
-![사용자 프로필 조회 API](./imgs/resume_list.png)
+![사용자 프로필 조회 API](./imgs/user_profile.png)
 
 - 사용자 예매 목록 조회 API
-![사용자 예매 목록 조회 API](./imgs/resume_detail.png)
+![사용자 예매 목록 조회 API](./imgs/user_ticket_list.png)
 
 - 공연 등록 API
-![공연 등록 API](./imgs/resume_update.png)
+![공연 등록 API](./imgs/create_show.png)
 
 - 공연 목록 조회 API
-![공연 목록 조회 API](./imgs/resume_delete.png)
+![공연 목록 조회 API](./imgs/show_list.png)
 
 - 공연 상세 조회 API
-![공연 상세 조회 API](./imgs/resume_change_state.png)
+![공연 상세 조회 API](./imgs/show_detail.png)
 
 - 공연 검색 API
-![공연 검색 API](./imgs/resume_log_list.png)
+![공연 검색 API](./imgs/show_search.png)
 
 - 공연 좌석 정보 조회 API
-![공연 좌석 정보 조회 API](./imgs/token_refresh.png)
+![공연 좌석 정보 조회 API](./imgs/seat_infos.png)
 
 - 공연 지정 좌석 예매 API
-![공연 지정 좌석 예매 API](./imgs/sign-out.png)
+![공연 지정 좌석 예매 API](./imgs/seat_reserve.png)
 
 - 공연 예매 취소 API
-![공연 예매 취소 API](./imgs/sign-out.png)
+![공연 예매 취소 API](./imgs/cancel_seat.png)
 
 <br>
 

@@ -115,7 +115,7 @@ export class AuthService {
     // Refresh Token 삭제 (soft delete)
     await this.refreshTokenRepository.update({ userId: user.id }, { token: null });
 
-    return { message: AUTH_MESSAGE };
+    return { message: AUTH_MESSAGE.SIGN_OUT.SUCCEED };
   }
 
   // 토큰 재발급
