@@ -306,7 +306,7 @@ export class ShowService {
       priceR: show.showPrice.priceR,
       priceVip: show.showPrice.priceVip,
       // 날짜별 잔여 좌석 수
-      showPlace: show.showPlace.map((place) => {
+      showPlaces: show.showPlace.map((place) => {
         return {
           seatA: place.seatA,
           seatS: place.seatS,
@@ -315,7 +315,7 @@ export class ShowService {
         };
       }),
       showTimes: show.showTimes.map((time) => time.showTime),
-      showPoster: show.showImages.map((image) => image.imageUrl),
+      showImages: show.showImages.map((image) => image.imageUrl),
       createdAt: show.createdAt,
       updatedAt: show.updatedAt,
     };
