@@ -350,45 +350,93 @@
 - 로그인 API
 ![로그인 API](./imgs/sign-in.png)
 
-- 내 정보 조회 API
-![내 정보 조회 API](./imgs/user_info.png)
-
-- 이력서 생성 API
-![이력서 생성 API](./imgs/resume_create.png)
-
-- 이력서 목록 조회 API
-![이력서 목록 조회 API](./imgs/resume_list.png)
-
-- 이력서 상세 조회 API
-![이력서 상세 조회 API](./imgs/resume_detail.png)
-
-- 이력서 수정 API
-![이력서 수정 API](./imgs/resume_update.png)
-
-- 이력서 삭제 API
-![이력서 삭제 API](./imgs/resume_delete.png)
-
-- 이력서 지원 상태 변경 API
-![이력서 지원 상태 변경 API](./imgs/resume_change_state.png)
-
-- 이력서 로그 목록 조회 API
-![이력서 로그 목록 조회 API](./imgs/resume_log_list.png)
-
-- 토큰 재발급 API
-![토큰 재발급 API](./imgs/token_refresh.png)
-
 - 로그아웃 API
 ![로그아웃 API](./imgs/sign-out.png)
+
+- 토큰 재발급 API
+![토큰 재발급 API](./imgs/refresh.png)
+
+- 사용자 프로필 조회 API
+![사용자 프로필 조회 API](./imgs/user_profile.png)
+
+- 사용자 예매 목록 조회 API
+![사용자 예매 목록 조회 API](./imgs/user_ticket_list.png)
+
+- 공연 등록 API
+![공연 등록 API](./imgs/create_show.png)
+
+- 공연 목록 조회 API
+![공연 목록 조회 API](./imgs/show_list.png)
+
+- 공연 상세 조회 API
+![공연 상세 조회 API](./imgs/show_detail.png)
+
+- 공연 검색 API
+![공연 검색 API](./imgs/show_search.png)
+
+- 공연 좌석 정보 조회 API
+![공연 좌석 정보 조회 API](./imgs/seat_infos.png)
+
+- 공연 지정 좌석 예매 API
+![공연 지정 좌석 예매 API](./imgs/seat_reserve.png)
+
+- 공연 예매 취소 API
+![공연 예매 취소 API](./imgs/cancel_seat.png)
 
 <br>
 
 ## 6. 어려웠던 점
-### 6-1. 인증 미들웨어의 Prisma 코드 변경
-- 
+### 6-1. 새로운 웹 프레임워크에 대한 어려움
+- Nest.js라는 새로운 웹 프레임워크에 익숙해지는데 생각보다 오래 걸렸다.
+
+- Express와 다르게 Nest.js에서 자동으로 지원해주는 과정들이 있어서 서버가 돌아가는 과정을 한번에 이해하기 어려웠다.
+
+- 특히나 Express는 오랜 기간동안 사용했기에 그 만큼 익숙해지고 어느 정도의 구조를 알고 있다.
+
+- 하지만 Nest.js는 사용한지 일주일 밖에 되지 않았기 때문에 조금 더 공부가 필요해 보인다.
 
 <br>
 
-### 6-2. 테스트 코드 구현 자체의 어려움
-- 
+### 6-2. 서버의 실행 순서와 모듈의 구성 이해의 어려움
+- 위에서 말한 것처럼 Nest.js를 처음 쓸 때, 내가 가장 어렵게 느낀 부분은 서버의 실행 순서였다.
+
+- 다행히 튜터님께서 공식문서에 있는 실행 순서를 알려 주셔서 이해하는데 큰 도움이 되었다.
+
+- https://docs.nestjs.com/faq/request-lifecycle
+
+- 순서를 알았으니 각 기능의 중심이 되는 모듈에 대한 궁금증이 생겼다.
+
+- 모듈에서는 해당 모듈에서 사용할 패키지를 imports하고, 서비스에서 가져와 사용할 것들을 providers에 추가하고, 어떤 컨트롤러를 사용할지 controllers에 작성하고, 다른 곳에서 해당 모듈의 어떤 것을 가져다 사용할 때 어떤 것을 exports할지 작성한다.
+
+- 다시 정리하면 imports는 외부 모듈이나 라이브러리를 가져와 사용할 것들을 작성하고,
+
+- providers는 현재 모듈에서 사용할 Service들을 작성,
+
+- controllers는 현재 모듈에서 사용할 Controller들을 작성,
+
+- exports는 현재 모듈에서의 기능 중 외부에서 사용할 수 있게 할 것들을 작성한다.
+
+- 그래서 만약에 해당 모듈에서의 서비스에서 다른 모듈의 서비스를 사용할려면 모듈의 providers나 imports에 명시해야 된다.
+
+- 서비스에서 다른 서비스과 의존성을 맺으면 먼저 providers에 가서 찾아보고 거기에 없으면 imports에서 찾아보고, 만약 거기에도 없으면 app 모듈에 가서 찾는다.
 
 <br>
+
+### 6-3. 미들웨어, 가드, 인터셉터, 파이프 개념의 어려움
+- 미들웨어는 Express와 똑같은 개념이기 때문에 어떤 용도인지 어느정도 파악했다.
+
+- 문제는 가드, 인터셉터, 파이프가 그냥 다 비슷하거나 똑같아 보였다.
+
+- https://assu10.github.io/dev/2023/04/08/nest-middleware-guard-interceptor-pipe-exceptionfilter-lifecycle/
+
+- 공식문서도 좋았지만 위 블로그에서도 잘 정리했기에 위 블로그를 참고했다.
+
+- 가드는 보통 인증, 인가와 같이 사용자를 필터링하는 역할을 합니다.
+
+- 인터셉터는 해당 API, 메서드 실행 전/후에 추가될 로직을 실행하는 역할을 한다.
+
+- 파이프는 해당 API가 실행되기 전에 들어가는 입력값에 대한 변환 또는 유효성 검사를 하는 역할을 한다.
+
+<br>
+
+![Nest.js 라이프 사이클](./imgs/lifecycle.png)
