@@ -269,10 +269,18 @@
 
 ### 4-13. 공연 좌석 정보 조회
 #### 4-13-1. 공연 좌석 정보 조회 Controller
-- 
+- 어떤 공연의 좌석 정보들을 반환할지 알기 위해서 `Path Parameter`를 통해서 공연 ID를 가져옵니다.
+
+- 가져온 공연 ID를 Service에 넘깁니다.
+
+- https://github.com/jkc-mycode/Show_Ticketing/blob/829bfeffab9cbdb159ffaacce60768b81a65ae73/src/seat/seat.controller.ts#L35-L39
 
 #### 4-13-2. 공연 좌석 정보 조회 Service
-- 
+- Controller로부터 받아온 공연 ID를 기반으로 좌석 데이터베이스에서 데이터를 검색해서 가져옵니다.
+
+- 그 중 현재 시간보다 이후의 공연에 대해서만 반환합니다.
+
+- https://github.com/jkc-mycode/Show_Ticketing/blob/fa9dc43840bdcb3af78334709a365ec242322c89/src/seat/seat.service.ts#L116-L140
 
 
 <br>
@@ -280,10 +288,22 @@
 
 ### 4-14. 공연 지정 좌석 예매
 #### 4-14-1. 공연 지정 좌석 예매 Controller
-- 
+- `AuthGuard('jwt')`를 통해서 로그인한 사용자인지, Access Token이 유효한지 확인합니다.
+
+- 그리고 `SeatCheckInterceptor`를 통해서 사용자가 입력한 좌석이 예매된 좌석인지 체크합니다.
+
+- 인터셉터는 컨트롤러에 접근 전/후에 어떠한 로직을 처리하기 위해서 사용합니다.
+
+- https://github.com/jkc-mycode/Show_Ticketing/blob/829bfeffab9cbdb159ffaacce60768b81a65ae73/src/seat/seat.controller.ts#L22-L33
 
 #### 4-14-2. 공연 지정 좌석 예매 Service
-- 
+- 우선 해당 공연이 존재하는지, 존재한 좌석인지, 사용자의 포인트가 남아있는지 등을 확인합니다.
+
+- 좌석 예매 역시 여러 다른 테이블의 데이터를 수정하거나 추가하기 때문에 하나의 트랜젝션에서 수행되어야 합니다.
+
+- 그렇기에 `QueryRunner`를 통해서 트랜젝션 문법을 사용합니다.
+
+- https://github.com/jkc-mycode/Show_Ticketing/blob/fa9dc43840bdcb3af78334709a365ec242322c89/src/seat/seat.service.ts#L36-L114
 
 
 <br>
@@ -291,17 +311,31 @@
 
 ### 4-15. 공연 예매 취소 
 #### 4-15-1. 공연 예매 취소 Controller
-- 
+- `AuthGuard('jwt')`를 통해서 로그인한 사용자인지, Access Token이 유효한지 확인합니다.
+
+- Request에 저장된 사용자 정보와 사용자가 입력한 예매 취소 DTO를 Service에 넘깁니다.
+
+- https://github.com/jkc-mycode/Show_Ticketing/blob/829bfeffab9cbdb159ffaacce60768b81a65ae73/src/seat/seat.controller.ts#L15-L20
 
 #### 4-15-2. 공연 예매 취소 Service
-- 
+- Controller로부터 받아온 티켓 ID를 통해서 해당 티켓이 실제로 존재하는지, 취소된 티켓이 아닌지를 확인합니다.
+
+- 그리고 예매 취소는 공연 시작 3시간 전까지만 가능합니다.
+
+- 예매 취소 역시 좌석 예매와 거의 비슷한 로직이 수행되기 때문에 `QueryRunner`를 이용한 트랜젝션 문법을 사용해야 합니다.
+
+- https://github.com/jkc-mycode/Show_Ticketing/blob/fa9dc43840bdcb3af78334709a365ec242322c89/src/seat/seat.service.ts#L142-L222
 
 
 <br>
 
 
 ### 4-16. 좌석 예매 여부 체크 인터셉터
-- 
+- `SeatCheckInterceptor`는 해당 좌석이 이미 예매된 좌석인지 확인하는 용도의 인터셉터입니다.
+
+- Request의 body에 접근해서 사용자가 입력한 데이터를 가져오고 좌석 Service를 통해서 해당 좌석이 예매 되었는지 확인합니다.
+
+- https://github.com/jkc-mycode/Show_Ticketing/blob/fa9dc43840bdcb3af78334709a365ec242322c89/src/seat/utils/seat-check.interceptor.ts#L12-L32
 
 
 <br>
