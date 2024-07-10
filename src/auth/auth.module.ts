@@ -3,13 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
-import { JwtStrategy } from './jwt.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
 import { AUTH_CONSTANT } from 'src/constants/auth/auth.constant';
+import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { AUTH_CONSTANT } from 'src/constants/auth/auth.constant';
     TypeOrmModule.forFeature([RefreshToken]),
     UserModule,
   ],
-  providers: [JwtStrategy, AuthService],
+  providers: [JwtStrategy, AuthService, LocalStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}

@@ -3,20 +3,22 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Show } from './show.entity';
+import { Seat } from 'src/seat/entities/seat.entity';
 import { SHOW_CONSTANT } from 'src/constants/show/show.constant';
-import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsOptional, Max } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { SHOW_MESSAGE } from 'src/constants/show/show.message.constant';
+import { Type } from 'class-transformer';
 
 @Entity({
-  name: SHOW_CONSTANT.ENTITY.SHOW_PRICE.NAME,
+  name: 'show_schedule',
 })
-export class ShowPrice {
+export class ShowSchedule {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -24,49 +26,60 @@ export class ShowPrice {
   @Column({ type: 'int', name: SHOW_CONSTANT.ENTITY.COMMON.SHOW_ID })
   showId: number;
 
+  @Column({ type: 'datetime', nullable: false })
+  showTime: Date;
+
   /**
-   * A 좌석 가격
-   * @example 1000
+   * 공연 장소명
+   * @example "공연 장소명 테스트"
    */
-  @Type(() => Number)
-  @IsNumber()
-  @Max(SHOW_CONSTANT.DTO.MAX_PRICE, { message: SHOW_MESSAGE.DTO.COMMON.SEAT_PRICE.MAX })
-  @IsNotEmpty({ message: SHOW_MESSAGE.DTO.PRICE_A.IS_NOT_EMPTY })
+  @IsString()
+  @IsNotEmpty({ message: SHOW_MESSAGE.DTO.PLACE_NAME.IS_NOT_EMPTY })
+  @Column({ type: 'varchar', nullable: false })
+  placeName: string;
+
   @Column({ type: 'int', nullable: false })
-  priceA: number;
+  totalSeat: number;
 
   /**
-   * S 좌석 가격
-   * @example 5000
+   * A 좌석 수
+   * @example 10
+   */
+  @Type(() => Number)
+  @IsNumber()
+  @IsNotEmpty({ message: SHOW_MESSAGE.DTO.SEAT_A.IS_NOT_EMPTY })
+  @Column({ type: 'int', nullable: false })
+  seatA: number;
+
+  /**
+   * S 좌석 수
+   * @example 7
    */
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @Max(SHOW_CONSTANT.DTO.MAX_PRICE, { message: SHOW_MESSAGE.DTO.COMMON.SEAT_PRICE.MAX })
   @Column({ type: 'int', nullable: true, default: 0 })
-  priceS: number;
+  seatS: number;
 
   /**
-   * R 좌석 가격
-   * @example 10000
+   * R 좌석 수
+   * @example 5
    */
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @Max(SHOW_CONSTANT.DTO.MAX_PRICE, { message: SHOW_MESSAGE.DTO.COMMON.SEAT_PRICE.MAX })
   @Column({ type: 'int', nullable: true, default: 0 })
-  priceR: number;
+  seatR: number;
 
   /**
-   * Vip 좌석 가격
-   * @example 30000
+   * Vip 좌석 수
+   * @example 2
    */
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
-  @Max(SHOW_CONSTANT.DTO.MAX_PRICE, { message: SHOW_MESSAGE.DTO.COMMON.SEAT_PRICE.MAX })
   @Column({ type: 'int', nullable: true, default: 0 })
-  priceVip: number;
+  seatVip: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -75,7 +88,10 @@ export class ShowPrice {
   updatedAt: Date;
 
   // 공연 엔티티와 관계 설정
-  @OneToOne(() => Show, (show) => show.showPrice, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Show, (show) => show.showSchedules, { onDelete: 'CASCADE' })
   @JoinColumn({ name: SHOW_CONSTANT.ENTITY.COMMON.SHOW_ID })
   show: Show;
+
+  @OneToMany(() => Seat, (seat) => seat.showSchedule, { cascade: true })
+  seats: Seat[];
 }

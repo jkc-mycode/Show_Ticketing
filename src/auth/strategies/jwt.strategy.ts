@@ -7,6 +7,7 @@ import { UserService } from 'src/user/user.service';
 import _ from 'lodash';
 import { AUTH_CONSTANT } from 'src/constants/auth/auth.constant';
 import { AUTH_MESSAGE } from 'src/constants/auth/auth.message.constant';
+import { JwtPayLoad } from '../interfaces/jwt-payload.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -16,12 +17,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: true,
       secretOrKey: configService.get(AUTH_CONSTANT.JWT.JWT_SECRET_KEY),
     });
   }
 
-  async validate(payload: any) {
+  async validate(payload: JwtPayLoad) {
     const user = await this.userService.findByUserId(payload.id);
     if (_.isNil(user) || user.id !== payload.id) {
       throw new NotFoundException(AUTH_MESSAGE.COMMON.USER.NOT_FOUND);

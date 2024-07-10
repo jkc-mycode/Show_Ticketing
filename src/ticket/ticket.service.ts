@@ -4,8 +4,6 @@ import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Show } from 'src/show/entities/show.entity';
 import { Seat } from 'src/seat/entities/seat.entity';
-import { ShowTime } from 'src/show/entities/show-time.entity';
-import { ShowPlace } from 'src/show/entities/show-place.entity';
 import { Ticket } from './entities/ticket.entity';
 
 @Injectable()
@@ -28,7 +26,7 @@ export class TicketService {
   }
 
   // 티켓 생성
-  createTicket(user: User, show: Show, seat: Seat, time: ShowTime, place: ShowPlace) {
+  createTicket(user: User, show: Show, seat: Seat, time, place) {
     return this.ticketRepository.create({
       userId: user.id,
       seatId: seat.id,

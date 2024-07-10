@@ -21,6 +21,7 @@ export const AUTH_MESSAGE = {
   COMMON: {
     USER: {
       NOT_FOUND: '일치하는 사용자가 없습니다.',
+      UNAUTHORIZED: '인증정보가 유효하지 않습니다.',
     },
   },
   SIGN_UP: {

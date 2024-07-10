@@ -55,8 +55,8 @@ export class AuthService {
     return user;
   }
 
-  // 로그인
-  async signIn(email: string, password: string) {
+  // 사용자 검증
+  async validateUser({ email, password }) {
     // 이메일로 사용자 조회 (비밀번호 있는 데이터 가져오기)
     const user = await this.userService.findByEmail(email, true);
     if (_.isNil(user)) {
@@ -69,6 +69,11 @@ export class AuthService {
       throw new UnauthorizedException(AUTH_MESSAGE.SIGN_IN.PASSWORD.UNAUTHORIZED);
     }
 
+    return user;
+  }
+
+  // 로그인
+  async signIn(user: User) {
     // 토큰 발급
     const accessToken = this.jwtService.sign(
       { id: user.id },

@@ -71,7 +71,7 @@ export class AwsService {
     const currentDate = today.getDate();
     const date = `${currentYear}-${currentMonth}-${currentDate}`;
 
-    const imageUrls: string[] = [];
+    const imageUrls: object[] = [];
 
     await Promise.all(
       files.map(async (file) => {
@@ -91,7 +91,7 @@ export class AwsService {
         const ext = file.originalname.split('.').pop();
 
         const imageUrl = await this.imageUploadToS3(`${imageName}.${ext}`, file, ext);
-        imageUrls.push(imageUrl);
+        imageUrls.push({ imageUrl });
       }),
     );
 

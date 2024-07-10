@@ -1,12 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
-import { AUTH_MESSAGE } from 'src/constants/auth/auth.message.constant';
+import { PickType } from '@nestjs/swagger';
+import { User } from 'src/user/entities/user.entity';
 
-export class SignInDto {
-  @IsEmail()
-  @IsNotEmpty({ message: AUTH_MESSAGE.DTO.EMAIL.IS_NOT_EMPTY })
-  email: string;
-
-  @IsString()
-  @IsNotEmpty({ message: AUTH_MESSAGE.DTO.PASSWORD.IS_NOT_EMPTY })
-  password: string;
-}
+export class SignInDto extends PickType(User, ['email', 'password']) {}

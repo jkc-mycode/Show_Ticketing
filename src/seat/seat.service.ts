@@ -35,7 +35,7 @@ export class SeatService {
 
   // 좌석 예매
   async reserveSeat(user: User, showId: number, reserveSeatDto: ReserveSeatDto) {
-    const { seatNumber, showTimeId } = reserveSeatDto;
+    const { seatNumber, showScheduleId } = reserveSeatDto;
 
     // 존재하는 공연인지 체크
     const show = await this.showService.findShowByShowId(showId);
@@ -43,18 +43,18 @@ export class SeatService {
       throw new NotFoundException(SEAT_MESSAGE.RESERVE_SEAT.SHOW.NOT_FOUND);
     }
 
-    // 존재하는 공연 시간인지 체크
-    const showTime = await this.showService.findShowTimeByShowTimeId(showTimeId);
-    if (_.isNil(showTime)) {
+    // 존재하는 공연 일정인지 체크
+    const showSchedule = await this.showService.findShowScheduleById(showScheduleId);
+    if (_.isNil(showSchedule)) {
       throw new NotFoundException(SEAT_MESSAGE.RESERVE_SEAT.SHOW_TIME.NOT_FOUND);
     }
 
     // 존재하는 좌석인지 체크
-    const seat = await this.findSeatInfo(seatNumber, showTimeId);
+    const seat = await this.findSeatInfo(seatNumber, showScheduleId);
     if (_.isNil(seat)) {
       throw new NotFoundException(SEAT_MESSAGE.RESERVE_SEAT.SEAT.NOT_FOUND);
     }
-    if (seat.showTime.showTime < new Date()) {
+    if (seat.showSchedule.showTime < new Date()) {
       throw new BadRequestException(SEAT_MESSAGE.RESERVE_SEAT.SEAT.SHOW_TIME_OVER);
     }
 
@@ -72,8 +72,8 @@ export class SeatService {
       const updatedUser = this.userService.updateUserPoint(user, user.point - seat.price);
       // 좌석이 예약됨으로 변경
       const updatedSeat = this.seatRepository.merge(seat, { isReserved: true });
-      // 해당 등급 좌석의 잔여 수량 변경
-      const place = await this.showService.findShowPlaceByShowTimeId(showTimeId);
+      // 해당 일정의 시간과 장소 데이터를 찾음
+      const place = await this.showService.findShowScheduleById(showScheduleId);
 
       // 어떤 좌석의 수를 변경할지에 대한 객체 생성
       const condition = {};
@@ -91,7 +91,7 @@ export class SeatService {
       const updatedPlace = this.showService.updatedShowPlaceSeatCount(place, condition);
 
       // 티켓 생성
-      const newTicket = this.ticketService.createTicket(user, show, seat, showTime, place);
+      const newTicket = this.ticketService.createTicket(user, show, seat, showSchedule, place);
 
       await Promise.all([
         queryRunner.manager.save(updatedUser),
@@ -118,11 +118,11 @@ export class SeatService {
     const seats = await this.seatRepository.find({
       where: { showId },
       relations: {
-        showTime: true,
+        showSchedule: true,
       },
     });
     const now = new Date();
-    const filteredSeats = seats.filter((seat) => seat.showTime.showTime > now);
+    const filteredSeats = seats.filter((seat) => seat.showSchedule.showTime > now);
 
     // 클라이언트에게 전달할 양식 지정
     const seatInfo = filteredSeats.map((seat) => {
@@ -131,8 +131,8 @@ export class SeatService {
         seatNumber: seat.seatNumber,
         grade: seat.grade,
         price: seat.price,
-        showTimeId: seat.showTimeId,
-        showTime: seat.showTime.showTime,
+        showScheduleId: seat.showSchedule.id,
+        showTime: seat.showSchedule.showTime,
         isReserved: seat.isReserved,
       };
     });
@@ -172,7 +172,7 @@ export class SeatService {
     });
 
     // 해당 공연의 좌석 수 조회
-    const place = await this.showService.findShowPlaceByShowTimeId(seat.showTimeId);
+    const place = await this.showService.findShowScheduleById(seat.showScheduleId);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -222,17 +222,24 @@ export class SeatService {
   }
 
   // 해당 좌석 정보를 반환하는 함수
-  async findSeatInfo(seatNumber: number, showTimeId: number) {
+  async findSeatInfo(seatNumber: number, showScheduleId: number) {
     return await this.seatRepository.findOne({
-      where: { seatNumber, showTimeId },
-      relations: { showTime: true },
+      where: { seatNumber, showScheduleId },
+      relations: { showSchedule: true },
     });
   }
 
-  createSeat(showId: number, showTimeId: number, seatNumber: number, grade: Grade, price: number) {
+  // 좌석 생성
+  createSeat(
+    showId: number,
+    showScheduleId: number,
+    seatNumber: number,
+    grade: Grade,
+    price: number,
+  ) {
     return this.seatRepository.create({
       showId,
-      showTimeId,
+      showScheduleId,
       seatNumber,
       grade,
       price,

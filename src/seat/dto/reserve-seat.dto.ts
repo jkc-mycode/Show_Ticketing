@@ -7,8 +7,8 @@ export class ReserveSeatDto {
   @IsNotEmpty({ message: SEAT_MESSAGE.DTO.RESERVE.SEAT_NUMBER.IS_NOT_EMPTY })
   seatNumber: number;
 
-  // 공연 날짜 ID
+  // 공연 일정 ID
   @IsNumber()
   @IsNotEmpty({ message: SEAT_MESSAGE.DTO.RESERVE.SHOW_TIME_ID.IS_NOT_EMPTY })
-  showTimeId: number;
+  showScheduleId: number;
 }

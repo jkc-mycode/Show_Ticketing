@@ -17,6 +17,9 @@ export const SHOW_MESSAGE = {
     RUNNING_TIME: {
       IS_NOT_EMPTY: '공연 상영 시간을 입력해 주세요.',
     },
+    IMAGES: {
+      IS_NOT_EMPTY: '이미지를 입력해 주세요.',
+    },
     TIMES: {
       IS_NOT_EMPTY: '공연 시간을 입력해 주세요.',
     },
